@@ -27,16 +27,13 @@
         <div class="search">
         <h2>Welcome to DocKonekt.</h2>
         <p>Search for your hospital below or scroll down to pick a hospital.</p>
-        <input type="text" placeholder="Search hospital">
-        <button class="button-65" role="button">Search</button>
-    </div>
-    <div class="hospitals-list">
-        <div class="items">
-            
-        </div>
+        <!-- Inside the search div -->
+        <input type="text" placeholder="Search hospital" id="searchInput" oninput="searchHospitals()">
+        <button class="button-65" role="button" id="searchButton">Search</button>
+        <ul id="suggestions" class="suggestions"></ul>
     </div>
     </div>
-  
+    <ul id="hospitalList" class="hospitalList"></ul>
     <div class="bottom_bar">
         <footer class="footer">
             <center><p>Follow us on social media below</p></center>
@@ -47,7 +44,7 @@
                 <li class="socials_wa"><a href="https://wa.me/254746852485" target="_blank"><img src="res/icon-whatsapp.webp" alt="Whatsapp"></a></li>
                 <li class="socials_tw"><a href="https://twitter.com/louiso_chieng1" target="_blank"><img src="res/x.jpg" alt="twitter"></a></li>
             </div>
-            <p>Copyright&copy;2024 Futurion Labs. All rights reserved</p>
+            <p>Copyright&copy;2024 Made at Futurion Labs (futurionlab.com). All rights reserved</p>
         </footer> 
         <script>
             document.addEventListener('DOMContentLoaded', function () {
@@ -57,6 +54,72 @@
                 menuIcon.addEventListener('click', function () {
                 menuItems.classList.toggle('show');
                 });
+
+                async function fetchHospitals() {
+                    try {
+                        const response = await fetch('/api/hospitals');
+                        const data = await response.json();
+            
+                        const hospitalList = document.getElementById('hospitalList');
+                        data.forEach(hospital => {
+                            const listItem = document.createElement('li');
+                            const anchor = document.createElement('a');
+                            
+                            anchor.textContent = `${hospital.hospital_name}`;
+                            anchor.href = hospital.hospital_url; // Set the actual URL
+                            anchor.target = '_blank'; // Open the link in a new tab/window
+                            anchor.rel = 'noopener noreferrer'; 
+            
+                            listItem.appendChild(anchor);
+                            hospitalList.appendChild(listItem);
+                        });
+                    } catch (error) {
+                        console.error('Error fetching hospitals:', error);
+                    }
+                }
+
+                fetchHospitals();
+ 
+                const searchInput = document.querySelector('input[type="text"]');
+                const searchButton = document.querySelector('button.button-65');
+                const hospitalList = document.getElementById('hospitalList');
+        
+                searchButton.addEventListener('click', async () => {
+                    const query = searchInput.value.trim();
+        
+                    if (query) {
+                        try {
+                            const response = await fetch('/api/search-hospitals', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ query }),
+                            });
+        
+                            const results = await response.json();
+        
+                            // Clear previous search results
+                            hospitalList.innerHTML = '';
+        
+                            // Display search results
+                            results.forEach(hospital => {
+                                const listItem = document.createElement('li');
+                                const anchor = document.createElement('a');
+        
+                                anchor.textContent = `${hospital.item.hospital_name}`;
+                                anchor.href = hospital.item.hospital_url; // Set the actual URL
+                                anchor.target = '_blank'; // Open the link in a new tab/window
+                                anchor.rel = 'noopener noreferrer';
+        
+                                listItem.appendChild(anchor);
+                                hospitalList.appendChild(listItem);
+                            });
+                        } catch (error) {
+                            console.error('Error searching hospitals:', error);
+                        }
+                    }
+                });   
             });
         </script>
     </div>

@@ -173,6 +173,11 @@
         width: 300px;
     }
 
-
-
+    .hospitalList{
+        background-color: rgb(34, 36, 51);
+        width: 96.5%;
+        margin-left: 5px;
+        border-radius: 5px;
+    }
+    
 }

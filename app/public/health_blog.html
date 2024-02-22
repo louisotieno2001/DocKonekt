@@ -23,16 +23,11 @@
             <img src="./res/photo.avif" alt="Profile image">
         </div>
     </div>
-
     <div class="blog-area">
-        <div class="blogtitle">
-        </div>
-        <div class="blog-body">
-           <script>
-               
-           </script>
-        </div>
-        
+        <div class="blog-title" id="blog-title"></div>
+        <div id="blog-body"></div>
+        <div id="time"></div>
+        <div id="date"></div>
     </div>
 
     <div class="bottom_bar">
@@ -45,16 +40,45 @@
                 <li class="socials_wa"><a href="https://wa.me/254746852485" target="_blank"><img src="res/icon-whatsapp.webp" alt="Whatsapp"></a></li>
                 <li class="socials_tw"><a href="https://twitter.com/louiso_chieng1" target="_blank"><img src="res/x.jpg" alt="twitter"></a></li>
             </div>
-            <p>Copyright&copy;2024 Futurion Labs. All rights reserved</p>
+            <p>Copyright&copy;2024 Made at Futurion Labs (futurionlab.com). All rights reserved</p>
         </footer> 
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
+        <script defer>
+            document.addEventListener('DOMContentLoaded', async function () {
+                const blogTitleElement = document.getElementById('blog-title');
+                const blogBodyElement = document.getElementById('blog-body');
+                const timeElement = document.getElementById('time');
+                const dateElement = document.getElementById('date');
                 const menuIcon = document.getElementById('menu_icon');
                 const menuItems = document.getElementById('menu-items');
-        
+
+                console.log(blogTitleElement,blogBodyElement,timeElement,dateElement)
+
                 menuIcon.addEventListener('click', function () {
-                menuItems.classList.toggle('show');
+                    menuItems.classList.toggle('show');
                 });
+
+                try {
+                    const response = await fetch('/api/blog-content');
+
+                   // console.log(response);
+
+                    if (response.ok) {
+                        const blogContent = await response.json();
+
+                        // Update the DOM with the fetched blog content
+                        blogTitleElement.innerHTML = `<h1>${blogContent.title}</h1>`;
+                        blogBodyElement.innerHTML = `<p>${blogContent.body}</p>`;
+                        timeElement.innerHTML = `<p>Time updated: ${blogContent.time}</p>`;
+                        dateElement.textContent = `<p>Date updated: ${blogContent.date}</p>`;
+
+                    } else {
+                        console.error('Error fetching blog content:', error);
+                    }
+
+                } catch (error) {
+                    console.error('Error fetching blog content:', error);
+                    window.confirm("Can't fetch content from the server");
+                }
             });
         </script>
     </div>
