@@ -1,0 +1,88 @@
+<!-- views/blogs.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blogs</title>
+    <link rel="stylesheet" href="styles/index.css">
+    <link rel="icon" href="./res/Picture4.png" type="image/x-icon">
+    <style>
+        #area {
+            padding-left: 70px;
+            padding-right: 70px;
+            height: max-content;
+        }
+
+        h2 {
+            color: aliceblue;
+            margin-top: 90px;
+            background-color: #616161;
+            border-radius: 8px;
+            padding: 1em;
+        }
+
+        .back{
+            color: aliceblue;
+            background-color: #616161;
+            border-radius: 8px;
+            padding: 1em;
+            font-family: sans-serif;
+            font-size: larger;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="top_bar">
+        <img src="./res/Picture4.png" alt="logo" class="logo">
+        <ul class="menu-items" id="menu-items">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="health_blog.html">Health Blog</a></li>
+            <li><a href="about_us.html">About Us</a></li>
+            <li><a href="get_in_touch.html">Contact Us</a></li>
+            <li><a href="terms.html">Terms of service</a></li>
+        </ul>
+        <img src="./res/menu_icon.png" alt="menu_icon" class="menu_icon" id="menu_icon">
+        <div class="profile">
+            <img src="./res/photo.avif" alt="Profile image">
+        </div>
+    </div>
+    <div class="blog-area" id="area">
+        <h2 class="back">
+            <%= blogs.data.title %>
+        </h2>
+        <p class="back">
+            <%= blogs.data.body %>
+        </p>
+        <p class="back">Time updated: <%= blogs.data.time %>
+        </p>
+        <p class="back">Date updated: <%= blogs.data.date %>
+        </p>
+    </div>
+    <div class="bottom_bar">
+        <footer class="footer">
+            <center>
+                <p>Follow us on social media below</p>
+            </center>
+            <div class="socials">
+                <li class="socials_lin"><a href="https://www.linkedin.com/company/futurionlabs/?viewAsMember=true"
+                        target="_blank"><img src="res/linkedin.png" alt="LinkedIn"></a></li>
+                <li class="socials_fb"><a href="https://www.facebook.com/profile.php?id=61551541325742"
+                        target="_blank"><img src="res/Facebook.png" alt="Facebook"></a></li>
+                <li class="socials_ig"><a href="https://www.instagram.com/futurion_labs123/" target="_blank"><img
+                            src="res/Instagram.png" alt="Instagram"></a></li>
+                <li class="socials_wa"><a href="https://wa.me/254746852485" target="_blank"><img
+                            src="res/icon-whatsapp.webp" alt="Whatsapp"></a></li>
+                <li class="socials_tw"><a href="https://twitter.com/louiso_chieng1" target="_blank"><img src="res/x.jpg"
+                            alt="twitter"></a></li>
+            </div>
+            <p>Copyright&copy;2024 Made at <a href="https://futurionlab.com"> Futurion Labs</a>. All rights reserved</p>
+        </footer>
+    </div>
+</body>
+
+</html>

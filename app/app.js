@@ -6,18 +6,41 @@ const path = require('path');
 require('dotenv').config();
 const Fuse = require('fuse.js');
 const cors = require('cors');
-
-
-
+const ejs = require('ejs');
 const app = express();
 
 const port = process.env.PORT || 3000;
 const saltRounds = 10; // Number of salt rounds for bcrypt
 
+/**
+    @param path  {String}
+    @param config {RequestInit}
+*/
+
+async function query(path, config){
+    const url = process.env.DIRECTUS_URL;
+    const token = process.env.DIRECTUS_TOKEN;
+    const res = await fetch(`${url}${path}`, {
+        headers: {
+            "Authorization":`Bearer ${token}`
+        },
+        ...config
+    });
+    return await res.json();
+}
+
+async function getBlog(id){
+    return query(`/items/blogs/${id}`, {
+       method: 'GET',    
+    })
+}
+
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
 const pool = new Pool({
     user: process.env.DB_USER,
@@ -30,6 +53,16 @@ const pool = new Pool({
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/blogs', async (req, res) => {
+    try {
+        const blogs = await getBlog(2);
+        res.render('blogs', { blogs });
+    } catch (error) {
+        console.error('Error fetching blogs:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
 
 app.post('/register', async (req, res) => {
@@ -116,58 +149,6 @@ app.get('/api/hospitals', async (req, res) => {
         res.json(hospitals);
     } catch (error) {
         console.error('Error fetching data:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-
-// Route for fuzzy hospital search
-app.post('/api/search-hospitals', async (req, res) => {
-    const { query } = req.body;
-
-    try {
-        const response = await fetch(`http://localhost:${port}/api/hospitals`);
-        const data = await response.json();
-
-        // Configure fuzzy search options
-        const fuseOptions = {
-            keys: ['hospital_name'],
-        };
-
-        // Create a new instance of Fuse with the options
-        const fuse = new Fuse(data, fuseOptions);
-
-        // Perform fuzzy search
-        const results = fuse.search(query);
-
-        // Send the fuzzy search results to the client
-        res.json(results);
-    } catch (error) {
-        console.error('Error searching hospitals:', error);
-        res.sendStatus(500);
-    }
-});
-
-app.get('/api/blog-content', async (req, res) => {
-    try {
-        const result = await pool.query('SELECT title, body, time, date FROM blogs');
-
-        if (result.rows.length > 0) {
-            const blogContentList = result.rows.map(blogContent => ({
-                title: blogContent.title,
-                body: blogContent.body,
-                time: blogContent.time,
-                date: blogContent.date,
-            }));
-
-            res.json(blogContentList);
-
-            console.log(result);
-            
-        } else {
-            res.status(404).json({ error: 'No blog posts found' });
-        }
-    } catch (error) {
-        console.error('Error fetching blog content:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });

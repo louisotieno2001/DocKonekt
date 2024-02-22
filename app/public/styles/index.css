@@ -490,7 +490,6 @@ ul.hospitalList li:hover {
     background-color: rgb(34, 36, 51);
     background-size: cover;
     background-position: center;
-    height: 100vh;
 }
 
 .blog-title{
@@ -516,4 +515,8 @@ ul.hospitalList li:hover {
     margin-left: 15px;
     color: white;
     font-family: sans-serif;
+}
+
+footer a{
+    color: aliceblue;
 }
