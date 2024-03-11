@@ -8,11 +8,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blogs</title>
     <link rel="stylesheet" href="styles/index.css">
+    <link rel="stylesheet" href="styles/small-devices.css">
     <link rel="icon" href="./res/Picture4.png" type="image/x-icon">
     <style>
         #area {
-            padding-left: 70px;
-            padding-right: 70px;
+            padding-left: 10px;
+            padding-right: 10px;
             height: max-content;
         }
 
@@ -83,6 +84,16 @@
             <p>Copyright&copy;2024 Made at <a href="https://futurionlab.com"> Futurion Labs</a>. All rights reserved</p>
         </footer>
     </div>
+      <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const menuIcon = document.getElementById('menu_icon');
+                const menuItems = document.getElementById('menu-items');
+
+                menuIcon.addEventListener('click', function () {
+                    menuItems.classList.toggle('show');
+                });
+            });
+        </script>
 </body>
 
 </html>
