@@ -14,6 +14,8 @@ const app = express();
 
 const port = process.env.PORT || 3000;
 const saltRounds = 10; // Number of salt rounds for bcrypt
+const url = process.env.DIRECTUS_URL;
+const token = process.env.DIRECTUS_TOKEN;
 
 /**
     @param path  {String}
@@ -95,13 +97,22 @@ app.post('/register', async (req, res) => {
 
     try {
         const hashedPassword = await bcrypt.hash(password, saltRounds);
+        const userData = { fullName, email, phone, password: hashedPassword };
+        const response = await fetch('http://127.0.0.1:8055/items/users', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                "Authorization":`Bearer ${token}`
+            },
+            body: JSON.stringify(userData)
+        });
+        const responseData = await response.json();
 
-        const result = await pool.query(
-            'INSERT INTO users (name, email, phone, password) VALUES ($1, $2, $3, $4) RETURNING *',
-            [fullName, email, phone, hashedPassword]
-        );
-
-        res.status(201).json({ success: true, user: result.rows[0] });
+        if (response.ok) {
+            res.status(201).json({ success: true, user: responseData });
+        } else {
+            throw new Error(`Failed to insert data: ${response.status} - ${response.statusText}`);
+        }
     } catch (error) {
         console.error('Error during registration:', error);
         res.status(500).json({ success: false, error: 'Registration failed' });
@@ -116,27 +127,27 @@ app.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+        // Authenticate user with Directus credentials
+        const response = await fetch('http://127.0.0.1:8055/items/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        const responseData = await response.json();
 
-        if (result.rows.length > 0) {
-            const user = result.rows[0];
-            const isPasswordMatch = await bcrypt.compare(password, user.password);
-
-            if (isPasswordMatch) {
-                 // Store user information in the session
-                req.session.user = {
-                    id: user.id,
-                    fname: user.firstname,
-                    lname: user.lastname,
-                    email: user.email,
-                    phone: user.phone
-                };
-                res.json({ success: true, user: req.session.user });
-            } else {
-                res.status(401).json({ success: false, error: 'Invalid credentials' });
-            }
+        if (response.ok) {
+            // Store user information in the session
+            req.session.user = {
+                id: responseData.data.id,
+                fname: responseData.data.firstname,
+                lname: responseData.data.lastname,
+                email: responseData.data.email,
+                phone: responseData.data.phone
+            };
+            res.json({ success: true, user: req.session.user });
         } else {
             res.status(401).json({ success: false, error: 'Invalid credentials' });
+            throw new Error(`Failed to insert data: ${response.status} - ${response.statusText}`);
         }
     } catch (error) {
         console.error('Error during login:', error);
@@ -153,22 +164,34 @@ app.post('/messages', checkSession, async (req, res) => {
         // Extract data from the request body
         const { name, email, phone, message } = req.body;
 
-        // Insert the data into the PostgreSQL database
-        const query =
-            'INSERT INTO messages (name, email, phone, message) VALUES ($1, $2, $3, $4) RETURNING id';
-        const values = [name, email, phone, message];
-
-        // Execute the query and get the inserted row's ID
-        const result = await pool.query(query, values);
-        const insertedRow = result.rows[0];
-
-        console.log(result);
-
-        // Send a response indicating successful insertion
-        res.status(201).json({
-            message: 'Data inserted successfully',
-            insertedRowId: insertedRow.id,
+        // Insert the data into Directus collection
+        const response = await fetch('http://127.0.0.1:8055/items/messages', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.DIRECTUS_TOKEN}`
+            },
+            body: JSON.stringify({ 
+                name,
+                email,
+                phone,
+                message
+            })
         });
+        const responseData = await response.json();
+
+        // Check if the insertion was successful
+        if (response.ok) {
+            // Send a response indicating successful insertion
+            res.status(201).json({
+                message: 'Data inserted successfully',
+                insertedRowId: responseData.data.id,
+            });
+        } else {
+            // Send error response if insertion failed
+            res.status(500).json({ message: 'Failed to insert data', error: responseData });
+            throw new Error(`Failed to insert data: ${response.status} - ${response.statusText}`);
+        }
     } catch (error) {
         console.error('Error while inserting data:', error);
         res.status(500).json({ message: 'Internal server error', error: error.message });
@@ -177,11 +200,29 @@ app.post('/messages', checkSession, async (req, res) => {
 
 app.get('/api/hospitals', checkSession, async (req, res) => {
     try {
-        const result = await pool.query('SELECT hospital_name, hospital_url FROM hospitals');
-        const hospitals = result.rows;
-        res.json(hospitals);
+        // Fetch hospitals data from Directus
+        const response = await fetch('http://127.0.0.1:8055/items/hospitals', {
+            headers: { 'Authorization': `Bearer ${process.env.DIRECTUS_TOKEN}` }
+        });
+        const data = await response.json();
+
+        // Check if the request was successful
+        if (response.ok) {
+            // Extract required fields from the response
+            const hospitals = data.data.map(item => ({
+                hospital_name: item.hospital_name,
+                hospital_url: item.hospital_url
+            }));
+
+            // Send the hospitals data as JSON response
+            res.json(hospitals);
+        } else {
+            // Send error response if fetching data failed
+            res.status(500).json({ error: 'Failed to fetch hospitals data', data });
+            throw new Error(`Failed to insert data: ${response.status} - ${response.statusText}`);
+        }
     } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching hospitals data:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -190,17 +231,43 @@ app.post('/register-pharmacy', checkSession, async (req, res) => {
     const { pharmacyName, pharmacyLocation, pharmacySpecificLocation, email, phone, password } = req.body;
 
     try {
+        // Hash the password
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-        const result = await pool.query(
-            'INSERT INTO pharmacies (pharmacy_name, pharmacy_location, pharmacy_specific_location, email, phone, password) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
-            [pharmacyName, pharmacyLocation, pharmacySpecificLocation, email, phone, hashedPassword]
-        );
+        // Prepare the data to be sent to Directus
+        const data = {
+            pharmacy_name: pharmacyName,
+            pharmacy_location: pharmacyLocation,
+            pharmacy_specific_location: pharmacySpecificLocation,
+            email: email,
+            phone: phone,
+            password: hashedPassword
+        };
 
-        res.status(201).json({ success: true, user: result.rows[0] });
+        // Send a POST request to Directus to create a new pharmacy entry
+        const response = await fetch('http://127.0.0.1:8055/items/pharmacies', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.DIRECTUS_TOKEN}`
+            },
+            body: JSON.stringify({ data })
+        });
+
+        // Check if the request was successful (HTTP status 200)
+        if (response.ok) {
+            const responseData = await response.json();
+            // Send the success response along with the newly created user data
+            res.status(201).json({ success: true, user: responseData.data });
+        } else {
+            // Send error response if the request fails
+            const errorData = await response.json();
+            res.status(500).json({ success: false, error: 'Registration failed', errorData });
+            throw new Error(`Failed to insert data: ${response.status} - ${response.statusText}`);
+        }
     } catch (error) {
         console.error('Error during registration:', error);
-        res.status(500).json({ success: false, error: 'Registration failed' });
+        res.status(500).json({ success: false, error: 'Registration failed', error: error.message });
     }
 });
 
@@ -208,37 +275,60 @@ app.post('/login-pharmacy', checkSession, async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const result = await pool.query('SELECT * FROM pharmacies WHERE email = $1', [email]);
+        // Send a POST request to Directus to authenticate the pharmacy user
+        const response = await fetch('http://127.0.0.1:8055/items/pharmacies', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password
+            })
+        });
 
-        if (result.rows.length > 0) {
-            const user = result.rows[0];
-            const isPasswordMatch = await bcrypt.compare(password, user.password);
-
-            if (isPasswordMatch) {
-                res.json({ success: true, user });
-            } else {
-                res.status(401).json({ success: false, error: 'Invalid credentials' });
-            }
+        // Check if the request was successful (HTTP status 200)
+        if (response.ok) {
+            const responseData = await response.json();
+            // Send the success response along with the user data
+            res.json({ success: true, user: responseData });
         } else {
-            res.status(401).json({ success: false, error: 'Invalid credentials' });
+            // Send error response if the request fails
+            const errorData = await response.json();
+            res.status(401).json({ success: false, error: 'Invalid credentials', errorData });
+            throw new Error(`Failed to insert data: ${response.status} - ${response.statusText}`);
         }
     } catch (error) {
         console.error('Error during login:', error);
-        res.status(500).json({ success: false, error: 'Login failed' });
+        res.status(500).json({ success: false, error: 'Login failed', error: error.message });
     }
 });
 
 app.get('/pharmacies', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT pharmacy_name, pharmacy_location, pharmacy_specific_location, contact_info FROM pharmacieslist');
-    const pharmacies = result.rows;
+    try {
+        // Send a GET request to Directus to fetch the pharmacies data
+        const response = await fetch('http://127.0.0.1:8055/items/pharmacieslist', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
 
-    // console.log('Pharmacies:', pharmacies);
-    res.json(pharmacies);
-  } catch (error) {
-    console.error('Error fetching schedule data from PostgreSQL database:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
+        // Check if the request was successful (HTTP status 200)
+        if (response.ok) {
+            const pharmacies = await response.json();
+            // Send the pharmacies data back to the client as JSON
+            res.json(pharmacies);
+        } else {
+            // Send error response if the request fails
+            const errorData = await response.json();
+            res.status(500).json({ error: 'Error fetching pharmacies data from Directus', errorData });
+            throw new Error(`Failed to insert data: ${response.status} - ${response.statusText}`);
+        }
+    } catch (error) {
+        console.error('Error fetching pharmacies data:', error);
+        res.status(500).json({ error: 'Internal Server Error', error: error.message });
+    }
 });
 
 app.listen(port, () => {
