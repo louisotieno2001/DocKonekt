@@ -113,7 +113,7 @@ app.post('/register', async (req, res) => {
             res.status(201).json({ success: true, user: responseData });
         } else {
             // If the response is not okay, throw an error to be caught by the catch block
-            throw new Error(`Failed to insert data: ${response.status} - ${response.statusText}`);
+            // throw new Error(`Failed to insert data: ${response.status} - ${response.statusText}`);
         }
     } catch (error) {
         console.error('Error during registration:', error);
@@ -132,8 +132,8 @@ app.post('/login', async (req, res) => {
     try {
         // Authenticate user with Directus credentials
         const response = await fetch('http://127.0.0.1:8055/items/users', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            method: 'GET',
+            // headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
         });
 
@@ -152,7 +152,7 @@ app.post('/login', async (req, res) => {
         } else {
             // Send error response
             res.status(401).json({ success: false, error: 'Invalid credentials' });
-            throw new Error(`Failed to insert data: ${response.status} - ${response.statusText}`);
+            // throw new Error(`Failed to insert data: ${response.status} - ${response.statusText}`);
         }
     } catch (error) {
         console.error('Error during login:', error);
@@ -174,10 +174,10 @@ app.post('/messages', checkSession, async (req, res) => {
         // Insert the data into Directus collection
         const response = await fetch('http://127.0.0.1:8055/items/messages', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${process.env.DIRECTUS_TOKEN}`
-            },
+            // headers: {
+            //     'Content-Type': 'application/json',
+            //     'Authorization': `Bearer ${process.env.DIRECTUS_TOKEN}`
+            // },
             body: JSON.stringify({
                 name,
                 email,
@@ -197,7 +197,7 @@ app.post('/messages', checkSession, async (req, res) => {
         } else {
             // Send error response if insertion failed
             res.status(500).json({ message: 'Failed to insert data', error: responseData });
-            throw new Error(`Failed to insert data: ${response.status} - ${response.statusText}`);
+            // throw new Error(`Failed to insert data: ${response.status} - ${response.statusText}`);
         }
     } catch (error) {
         console.error('Error while inserting data:', error);
@@ -226,7 +226,7 @@ app.get('/api/hospitals', checkSession, async (req, res) => {
         } else {
             // Send error response if fetching data failed
             res.status(500).json({ error: 'Failed to fetch hospitals data', data });
-            throw new Error(`Failed to insert data: ${response.status} - ${response.statusText}`);
+            // throw new Error(`Failed to insert data: ${response.status} - ${response.statusText}`);
         }
     } catch (error) {
         console.error('Error fetching hospitals data:', error);
@@ -270,7 +270,7 @@ app.post('/register-pharmacy', checkSession, async (req, res) => {
             // Send error response if the request fails
             const errorData = await response.json();
             res.status(500).json({ success: false, error: 'Registration failed', errorData });
-            throw new Error(`Failed to insert data: ${response.status} - ${response.statusText}`);
+            // throw new Error(`Failed to insert data: ${response.status} - ${response.statusText}`);
         }
     } catch (error) {
         console.error('Error during registration:', error);
@@ -303,7 +303,7 @@ app.post('/login-pharmacy', checkSession, async (req, res) => {
             // Send error response if the request fails
             const errorData = await response.json();
             res.status(401).json({ success: false, error: 'Invalid credentials', errorData });
-            throw new Error(`Failed to insert data: ${response.status} - ${response.statusText}`);
+            // throw new Error(`Failed to insert data: ${response.status} - ${response.statusText}`);
         }
     } catch (error) {
         console.error('Error during login:', error);
@@ -330,7 +330,7 @@ app.get('/pharmacies', async (req, res) => {
             // Send error response if the request fails
             const errorData = await response.json();
             res.status(500).json({ error: 'Error fetching pharmacies data from Directus', errorData });
-            throw new Error(`Failed to insert data: ${response.status} - ${response.statusText}`);
+            // throw new Error(`Failed to insert data: ${response.status} - ${response.statusText}`);
         }
     } catch (error) {
         console.error('Error fetching pharmacies data:', error);
