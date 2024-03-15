@@ -1,0 +1,16 @@
+4|app      |     at new NodeError (node:internal/errors:405:5)
+4|app      |     at ServerResponse.setHeader (node:_http_outgoing:648:11)
+4|app      |     at ServerResponse.header (/home/dockonekt/DocKonekt/app/node_modules/express/lib/response.js:794:10)
+4|app      |     at ServerResponse.send (/home/dockonekt/DocKonekt/app/node_modules/express/lib/response.js:174:12)
+4|app      |     at ServerResponse.json (/home/dockonekt/DocKonekt/app/node_modules/express/lib/response.js:278:15)
+4|app      |     at /home/dockonekt/DocKonekt/app/app.js:160:25
+4|app      |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+4|app      |   code: 'ERR_HTTP_HEADERS_SENT'
+4|app      | }
+4|app      | Error during registration: Error: Failed to insert data: 400 - Bad Request
+4|app      |     at /home/dockonekt/DocKonekt/app/app.js:116:19
+4|app      |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+4|app      | Error during registration: Error: Failed to insert data: 400 - Bad Request
+4|app      |     at /home/dockonekt/DocKonekt/app/app.js:116:19
+4|app      |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
