@@ -1,4 +1,7 @@
 const express = require('express');
+const session = require('express-session');
+const multer = require('multer');
+const pgSession = require('connect-pg-simple')(session);
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const { Pool } = require('pg');
@@ -51,11 +54,33 @@ const pool = new Pool({
     ssl: { rejectUnauthorized: false } 
 });
 
+app.use(session({
+    store: new pgSession({
+        pool: pool,
+        tableName: 'session',
+    }),
+    secret: 'MPILHSALJD',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    },
+}));
+
+// Middleware to check if the user has an active session
+const checkSession = (req, res, next) => {
+    if (req.session.user) {
+        next(); // Continue to the next middleware or route
+    } else {
+        res.redirect('/login.html'); // Redirect to the login page if no session is found
+    }
+};
+
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.get('/blogs', async (req, res) => {
+app.get('/blogs', checkSession, async (req, res) => {
     try {
         const blogs = await getBlog(2);
         res.render('blogs', { blogs });
@@ -98,7 +123,15 @@ app.post('/login', async (req, res) => {
             const isPasswordMatch = await bcrypt.compare(password, user.password);
 
             if (isPasswordMatch) {
-                res.json({ success: true, user });
+                 // Store user information in the session
+                req.session.user = {
+                    id: user.id,
+                    fname: user.firstname,
+                    lname: user.lastname,
+                    email: user.email,
+                    phone: user.phone
+                };
+                res.json({ success: true, user: req.session.user });
             } else {
                 res.status(401).json({ success: false, error: 'Invalid credentials' });
             }
@@ -111,11 +144,11 @@ app.post('/login', async (req, res) => {
     }
 });
 
-app.get('/messages', (req, res) => {
+app.get('/messages', checkSession, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'get_in_touch.html'));
 });
 
-app.post('/messages', async (req, res) => {
+app.post('/messages', checkSession, async (req, res) => {
     try {
         // Extract data from the request body
         const { name, email, phone, message } = req.body;
@@ -142,7 +175,7 @@ app.post('/messages', async (req, res) => {
     }
 });
 
-app.get('/api/hospitals', async (req, res) => {
+app.get('/api/hospitals', checkSession, async (req, res) => {
     try {
         const result = await pool.query('SELECT hospital_name, hospital_url FROM hospitals');
         const hospitals = result.rows;
@@ -151,6 +184,61 @@ app.get('/api/hospitals', async (req, res) => {
         console.error('Error fetching data:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
+});
+
+app.post('/register-pharmacy', checkSession, async (req, res) => {
+    const { pharmacyName, pharmacyLocation, pharmacySpecificLocation, email, phone, password } = req.body;
+
+    try {
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        const result = await pool.query(
+            'INSERT INTO pharmacies (pharmacy_name, pharmacy_location, pharmacy_specific_location, email, phone, password) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+            [pharmacyName, pharmacyLocation, pharmacySpecificLocation, email, phone, hashedPassword]
+        );
+
+        res.status(201).json({ success: true, user: result.rows[0] });
+    } catch (error) {
+        console.error('Error during registration:', error);
+        res.status(500).json({ success: false, error: 'Registration failed' });
+    }
+});
+
+app.post('/login-pharmacy', checkSession, async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        const result = await pool.query('SELECT * FROM pharmacies WHERE email = $1', [email]);
+
+        if (result.rows.length > 0) {
+            const user = result.rows[0];
+            const isPasswordMatch = await bcrypt.compare(password, user.password);
+
+            if (isPasswordMatch) {
+                res.json({ success: true, user });
+            } else {
+                res.status(401).json({ success: false, error: 'Invalid credentials' });
+            }
+        } else {
+            res.status(401).json({ success: false, error: 'Invalid credentials' });
+        }
+    } catch (error) {
+        console.error('Error during login:', error);
+        res.status(500).json({ success: false, error: 'Login failed' });
+    }
+});
+
+app.get('/pharmacies', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT pharmacy_name, pharmacy_location, pharmacy_specific_location, contact_info FROM pharmacieslist');
+    const pharmacies = result.rows;
+
+    // console.log('Pharmacies:', pharmacies);
+    res.json(pharmacies);
+  } catch (error) {
+    console.error('Error fetching schedule data from PostgreSQL database:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
 app.listen(port, () => {
