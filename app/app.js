@@ -22,21 +22,21 @@ const token = process.env.DIRECTUS_TOKEN;
     @param config {RequestInit}
 */
 
-async function query(path, config){
+async function query(path, config) {
     const url = process.env.DIRECTUS_URL;
     const token = process.env.DIRECTUS_TOKEN;
     const res = await fetch(`${url}${path}`, {
         headers: {
-            "Authorization":`Bearer ${token}`
+            "Authorization": `Bearer ${token}`
         },
         ...config
     });
     return await res.json();
 }
 
-async function getBlog(id){
+async function getBlog(id) {
     return query(`/items/blogs/${id}`, {
-       method: 'GET',    
+        method: 'GET',
     })
 }
 
@@ -53,7 +53,7 @@ const pool = new Pool({
     database: process.env.DB_NAME,
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
-    ssl: { rejectUnauthorized: false } 
+    ssl: { rejectUnauthorized: false }
 });
 
 app.use(session({
@@ -100,21 +100,24 @@ app.post('/register', async (req, res) => {
         const userData = { fullName, email, phone, password: hashedPassword };
         const response = await fetch('http://127.0.0.1:8055/items/users', {
             method: 'POST',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
-                "Authorization":`Bearer ${token}`
+                "Authorization": `Bearer ${token}`
             },
             body: JSON.stringify(userData)
         });
-        const responseData = await response.json();
 
         if (response.ok) {
+            const responseData = await response.json();
+            // Send success response
             res.status(201).json({ success: true, user: responseData });
         } else {
+            // If the response is not okay, throw an error to be caught by the catch block
             throw new Error(`Failed to insert data: ${response.status} - ${response.statusText}`);
         }
     } catch (error) {
         console.error('Error during registration:', error);
+        // Send error response
         res.status(500).json({ success: false, error: 'Registration failed' });
     }
 });
@@ -167,11 +170,11 @@ app.post('/messages', checkSession, async (req, res) => {
         // Insert the data into Directus collection
         const response = await fetch('http://127.0.0.1:8055/items/messages', {
             method: 'POST',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${process.env.DIRECTUS_TOKEN}`
             },
-            body: JSON.stringify({ 
+            body: JSON.stringify({
                 name,
                 email,
                 phone,
