@@ -136,9 +136,9 @@ app.post('/login', async (req, res) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
         });
-        const responseData = await response.json();
 
         if (response.ok) {
+            const responseData = await response.json();
             // Store user information in the session
             req.session.user = {
                 id: responseData.data.id,
@@ -147,16 +147,20 @@ app.post('/login', async (req, res) => {
                 email: responseData.data.email,
                 phone: responseData.data.phone
             };
+            // Send success response
             res.json({ success: true, user: req.session.user });
         } else {
+            // Send error response
             res.status(401).json({ success: false, error: 'Invalid credentials' });
             throw new Error(`Failed to insert data: ${response.status} - ${response.statusText}`);
         }
     } catch (error) {
         console.error('Error during login:', error);
+        // Send error response
         res.status(500).json({ success: false, error: 'Login failed' });
     }
 });
+
 
 app.get('/messages', checkSession, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'get_in_touch.html'));
