@@ -23,20 +23,43 @@ const token = process.env.DIRECTUS_TOKEN;
 */
 
 async function query(path, config) {
-    const url = process.env.DIRECTUS_URL;
-    const token = process.env.DIRECTUS_TOKEN;
     const res = await fetch(`${url}${path}`, {
         headers: {
             "Authorization": `Bearer ${token}`
         },
         ...config
     });
-    return await res.json();
+    return res;
 }
 
 async function getBlog(id) {
-    return query(`/items/blogs/${id}`, {
+    let res = await query(`/items/blogs/${id}`, {
         method: 'GET',
+    });
+    await res.json();
+}
+
+async function registerUser(user) {
+   return await query('/items/users/', {
+        method: 'POST',
+        body: JSON.stringify(user)
+    })
+}
+async function fetchUserByEmail(email){
+    // filter by email
+    let filter = {
+        query : {
+            filter: {
+                email: {
+                    "_eq": email
+                }
+            }
+        }
+    };
+    
+    return await query('/items/users/', {
+        method: 'SEARCH',
+        body: JSON.stringify(filter)
     })
 }
 
@@ -97,15 +120,8 @@ app.post('/register', async (req, res) => {
 
     try {
         const hashedPassword = await bcrypt.hash(password, saltRounds);
-        const userData = { fullName, email, phone, password: hashedPassword };
-        const response = await fetch('http://127.0.0.1:8055/items/users', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                "Authorization": `Bearer ${token}`
-            },
-            body: JSON.stringify(userData)
-        });
+        const userData = { name: fullName, email, phone, password: hashedPassword };
+        let response = await registerUser(userData);
 
         if (response.ok) {
             const responseData = await response.json();
@@ -132,12 +148,9 @@ app.post('/login', async (req, res) => {
 
     try {
         // Authenticate user with Directus credentials
-        const response = await fetch('http://127.0.0.1:8055/items/users', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        });
+        let  response = await fetchUserByEmail(email);
         const responseData = await response.json();
+        console.log(responseData);
 
         if (response.ok) {
             // Store user information in the session
