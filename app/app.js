@@ -23,9 +23,10 @@ const token = process.env.DIRECTUS_TOKEN;
 */
 
 async function query(path, config) {
-    const res = await fetch(`${url}${path}`, {
+    const res = await fetch(encodeURI(`${url}${path}`), {
         headers: {
-            "Authorization": `Bearer ${token}`
+            "Authorization": `Bearer ${token}`,
+		"Content-Type":"application/json",
         },
         ...config
     });
@@ -46,20 +47,9 @@ async function registerUser(user) {
     })
 }
 async function fetchUserByEmail(email){
-    // filter by email
-    let filter = {
-        query : {
-            filter: {
-                email: {
-                    "_eq": email
-                }
-            }
-        }
-    };
-    
-    return await query('/items/users/', {
+     return await query(`/items/users?filter[email][_eq]=${email}`, {
         method: 'SEARCH',
-        body: JSON.stringify(filter)
+        body: JSON.stringify(email)
     })
 }
 
@@ -92,6 +82,10 @@ app.use(session({
     },
 }));
 
+async function hashPassword(password) {
+	await bcrypt.hash(password, saltRounds);
+}
+
 // Middleware to check if the user has an active session
 const checkSession = (req, res, next) => {
     if (req.session.user) {
@@ -119,14 +113,17 @@ app.post('/register', async (req, res) => {
     const { fullName, email, phone, password } = req.body;
 
     try {
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
+	const hashedPassword = await hashPassword(password);
         const userData = { name: fullName, email, phone, password: hashedPassword };
+	console.log(userData);
         let response = await registerUser(userData);
 
         if (response.ok) {
             const responseData = await response.json();
             // Send success response
-            res.status(201).json({ success: true, user: responseData });
+            res.status(201).json({ success: true, user: {
+		id: responseData.data.id
+	    }});
         } else {
             // If the response is not okay, throw an error to be caught by the catch block
             throw new Error(`Failed to insert data: ${response.status} - ${response.statusText}`);
@@ -150,21 +147,24 @@ app.post('/login', async (req, res) => {
         // Authenticate user with Directus credentials
         let  response = await fetchUserByEmail(email);
         const responseData = await response.json();
-        console.log(responseData);
 
-        if (response.ok) {
+        if (response.ok && responseData.data.length > 0) {
+		let user = responseData.data[0];
             // Store user information in the session
+	    const hashedPassword = await hashPassword(password);
+		if (hashedPassword == user.password){
             req.session.user = {
                 id: responseData.data.id,
-                fname: responseData.data.firstname,
-                lname: responseData.data.lastname,
+                fname: responseData.data.name,
                 email: responseData.data.email,
                 phone: responseData.data.phone
             };
             res.json({ success: true, user: req.session.user });
+	}else{
+		res.json({success: false, message: "Invalid email or password" });
+	}
         } else {
             res.status(401).json({ success: false, error: 'Invalid credentials' });
-            throw new Error(`Failed to insert data: ${response.status} - ${response.statusText}`);
         }
     } catch (error) {
         console.error('Error during login:', error);
