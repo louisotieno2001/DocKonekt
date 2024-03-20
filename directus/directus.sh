@@ -1,1 +1,0 @@
-directus start

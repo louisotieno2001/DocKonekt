@@ -78,7 +78,7 @@
 
                 async function fetchHospitals() {
                     try {
-                        const response = await fetch('/api/hospitals');
+                        const response = await fetch('/hospitals');
                         const data = await response.json();
             
                         const hospitalList = document.getElementById('hospitalList');
@@ -110,7 +110,7 @@
         
                     if (query) {
                         try {
-                            const response = await fetch('/api/search-hospitals', {
+                            const response = await fetch('/search-hospitals', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
