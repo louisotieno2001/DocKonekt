@@ -34,6 +34,19 @@ const pool = new Pool({
     ssl: { rejectUnauthorized: false },
 });
 
+app.use(session({
+    store: new pgSession({
+        pool: pool,
+        tableName: 'session',
+    }),
+    secret: 'MPILHSALJD',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    },
+}));
+
 /**
     @param path  {String}
     @param config {RequestInit}
@@ -126,7 +139,7 @@ app.post('/login', async (req, res) => {
     }
 });
 
-app.post('/messages', async (req, res) => {
+app.post('/messages', checkSession, async (req, res) => {
     try {
         // Extract data from the request body
         const { name, email, phone, message } = req.body;
@@ -153,7 +166,7 @@ app.post('/messages', async (req, res) => {
     }
 });
 
-app.get('/pharmacies', async (req, res) => {
+app.get('/pharmacies', checkSession, async (req, res) => {
     try {
         const result = await pool.query('SELECT pharmacy_name, pharmacy_location, pharmacy_specific_location, contact_info FROM pharmacies');
         const pharmacies = result.rows;
@@ -166,7 +179,7 @@ app.get('/pharmacies', async (req, res) => {
     }
 });
 
-app.post('/register-pharmacy', async (req, res) => {
+app.post('/register-pharmacy', checkSession, async (req, res) => {
     const { pharmacyName,
         pharmacyLocation,
         pharmacySpecificLocation,
@@ -198,7 +211,7 @@ app.post('/register-pharmacy', async (req, res) => {
     }
 });
 
-app.post('/login-pharmacy', async (req, res) => {
+app.post('/login-pharmacy', checkSession, async (req, res) => {
     const { email, password } = req.body;
 
     try {
@@ -222,7 +235,7 @@ app.post('/login-pharmacy', async (req, res) => {
     }
 });
 
-app.get('/blogs', async (req, res) => {
+app.get('/blogs', checkSession, async (req, res) => {
     try {
         const blogs = await getBlog(1);
         console.log(blogs);
@@ -233,7 +246,7 @@ app.get('/blogs', async (req, res) => {
     }
 });
 
-app.get('/hospitals', async (req, res) => {
+app.get('/hospitals', checkSession, async (req, res) => {
     try {
         const result = await pool.query('SELECT hospital_name, hospital_url FROM hospitals');
         const hospitals = result.rows;
