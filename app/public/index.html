@@ -55,8 +55,8 @@
                     <label for="phone">Phone: </label>
                     <input type="tel" name="phone" id="phone" required autocomplete="phone" placeholder="0711223344">
                     <label for="password">Password</label>
-                    <input type="password" name="password" id="password" required autocomplete="current-password"
-                        placeholder="password"><br>
+                    <input type="password" name="password" id="password" required autocomplete="current-password" placeholder="Password">
+                    Show Password<input type="checkbox" id="showPassword">
                     <button type="button" class="register" id="submit">Register</button>
                     <p class="alt_account">Already have an account? <a href="login.html" id="login-link">Login</a></p>
                 </form>
@@ -64,6 +64,7 @@
                 <script>
                     document.addEventListener("DOMContentLoaded", function () {
                         const submitBtn = document.getElementById('submit');
+                        const passwordInput = document.getElementById('password');
 
                         submitBtn.addEventListener("click", async (e) => {
                             e.preventDefault();
@@ -118,6 +119,16 @@
                                 }
                             }
                         });
+
+                        const showPasswordCheckbox = document.getElementById('showPassword');
+
+                        showPasswordCheckbox.addEventListener('change', function () {
+                            if (showPasswordCheckbox.checked) {
+                                passwordInput.type = 'text'; // Change type to 'text' to show the password
+                            } else {
+                                passwordInput.type = 'password'; // Change type back to 'password' to hide the password
+                            }
+                        });
                     });
 
                 </script>
@@ -125,4 +136,5 @@
         </div>
     </div>
 </body>
+
 </html>

@@ -48,6 +48,44 @@
             box-sizing: border-box;
         }
 
+        .button-9 {
+            appearance: button;
+            backface-visibility: hidden;
+            background-color: #405cf5;
+            border-radius: 6px;
+            border-width: 0;
+            box-shadow: rgba(50, 50, 93, .1) 0 0 0 1px inset, rgba(50, 50, 93, .1) 0 2px 5px 0, rgba(0, 0, 0, .07) 0 1px 1px 0;
+            box-sizing: border-box;
+            color: #fff;
+            cursor: pointer;
+            font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Ubuntu, sans-serif;
+            font-size: 100%;
+            height: 44px;
+            line-height: 1.15;
+            margin: 12px 0 0;
+            outline: none;
+            overflow: hidden;
+            padding: 0 25px;
+            position: relative;
+            text-align: center;
+            text-transform: none;
+            transform: translateZ(0);
+            transition: all .2s, box-shadow .08s ease-in;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            width: 50%;
+        }
+
+        .button-9:disabled {
+            cursor: default;
+        }
+
+        .button-9:focus {
+            box-shadow: rgba(50, 50, 93, .1) 0 0 0 1px inset, rgba(50, 50, 93, .2) 0 6px 15px 0, rgba(0, 0, 0, .1) 0 2px 2px 0, rgba(50, 151, 211, .3) 0 0 0 4px;
+        }
+
+
         button {
             background-color: #4CAF50;
             color: white;
@@ -87,6 +125,7 @@
             <li><a href="about_us.html" title="Learn more about us">About Us</a></li>
             <li><a href="get_in_touch.html" title="Send uus a messaage">Contact Us</a></li>
             <li><a href="terms.html" title="Look at our terms of service">Terms of service</a></li>
+            <li><a href="user-type.html" title="Register your pharmacy with us">My Pharma</a></li>
         </ul>
         <img src="./res/menu_icon.png" alt="menu_icon" class="menu_icon" id="menu_icon">
         <div class="profile">
@@ -101,7 +140,8 @@
                 <span style="color: red;">NOTE:</span> It is important to contact the pharmacy you are ordering from to
                 inquire if they have the medicine you are
                 looking for before making your order. Dockonekt owns no pharmacies and therefore acts merely as a link
-                between you and your preferred pharmacy.</p>
+                between you and your preferred pharmacy.
+            </p>
             <dialog class="dialog" style="background-color: #66BB6A; border: none; border-radius: 8px;">
                 <h3 style="color: red;">Warning! This is an irreversable process, are you sure you want to proceed?</h3>
                 </p>
@@ -164,7 +204,7 @@
                       <h2>${pharmacy.pharmacy_name}</h2>
                       <p>Location: ${pharmacy.pharmacy_location}</p>
                       <p>Specific location: ${pharmacy.pharmacy_specific_location}</p>
-                      <p>Contact Info: ${pharmacy.contact_info}</p>
+                      <p>Contact Info: ${pharmacy.phone}</p>
                     `;
 
                         const button = document.createElement('button');
@@ -179,20 +219,42 @@
                             dialog.showModal();
 
                             proceedButton.addEventListener("click", async (e) => {
-                               e.preventDefault();
-                               const pharmacyName = document.getElementById('pharmacy-name');
-                               const pharmacyLocation = document.getElementById('pharmacy-location');
-                               const pharmacyPhone = document.getElementById('pharmacy-phone');
-                               const patientPhone = document.getElementById('patient-phone');
-                               const agreementText = document.getElementById('agreement');
+                                e.preventDefault();
+                                const pharmacyName = document.getElementById('pharmacy-name').value.trim();
+                                const pharmacyLocation = document.getElementById('pharmacy-location').value.trim();
+                                const pharmacyPhone = document.getElementById('pharmacy-phone').value.trim();
+                                const patientPhone = document.getElementById('patient-phone').value.trim();
+                                const agreement = document.getElementById('agreement').value.trim();
 
-                               pharmacyNameValue = pharmacyName.value.trim();
-                               pharmacyLocationValue = pharmacyLocation.value.trim();
-                               pharmacyPhoneValue = pharmacyPhone.value.trim();
-                               patientPhoneValue = patientPhone.value.trim();
-                               agreementTextValue = agreementText.value.trim();
+                                if (!pharmacyName || !pharmacyLocation || !pharmacyPhone || !patientPhone || !agreement) {
+                                    alert("All fields are required");
+                                }
+                                else {
 
+                                    try {
+                                        const response = await fetch('/orders', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json'
+                                            },
+                                            body: JSON.stringify({
+                                                pharmacyName,
+                                                pharmacyLocation,
+                                                pharmacyPhone,
+                                                patientPhone,
+                                                agreement
+                                            })
+                                        });
+                                        const data = await response.json();
+                                        alert("Order placed successfully, wait while we process your order");
+                                        dialog.close();
+                                    } catch (error) {
+                                        console.error('Error:', error);
+                                        alert("Something went wrong")
+                                    }
+                                }
                             });
+
 
                             cancelButton.addEventListener("click", async (e) => {
                                 e.preventDefault();

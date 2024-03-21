@@ -39,13 +39,21 @@ app.use(session({
         pool: pool,
         tableName: 'session',
     }),
-    secret: 'MPILHSALJD',
+    secret: 'sqT_d_qxWqHyXS6Yk7Me8APygz3EjFE8',
     resave: false,
     saveUninitialized: false,
     cookie: {
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     },
 }));
+
+const checkSession = (req, res, next) => {
+    if (req.session.user) {
+        next(); // Continue to the next middleware or route
+    } else {
+        res.redirect('/login.html'); // Redirect to the login page if no session is found
+    }
+};
 
 /**
     @param path  {String}
@@ -69,20 +77,6 @@ async function getBlog(id) {
     });
     return await res.json();
 }
-
-app.use(session({
-    secret: 'hghvjhjvtdrdfufj', // Change this to your actual secret key
-    resave: false,
-    saveUninitialized: true,
-}));
-
-const checkSession = (req, res, next) => {
-    if (req.session.user) {
-        next(); // Continue to the next middleware or route
-    } else {
-        res.redirect('/login.html'); // Redirect to the login page if no session is found
-    }
-};
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -126,6 +120,9 @@ app.post('/login', async (req, res) => {
             const isPasswordMatch = await bcrypt.compare(password, user.password);
 
             if (isPasswordMatch) {
+                // Store user information in the session
+                req.session.user = user;
+
                 res.json({ success: true, user });
             } else {
                 res.status(401).json({ success: false, error: 'Invalid credentials' });
@@ -168,7 +165,7 @@ app.post('/messages', checkSession, async (req, res) => {
 
 app.get('/pharmacies', checkSession, async (req, res) => {
     try {
-        const result = await pool.query('SELECT pharmacy_name, pharmacy_location, pharmacy_specific_location, contact_info FROM pharmacies');
+        const result = await pool.query('SELECT pharmacy_name, pharmacy_location, pharmacy_specific_location, phone FROM pharmacists');
         const pharmacies = result.rows;
 
         // console.log('Pharmacies:', pharmacies);
@@ -180,12 +177,7 @@ app.get('/pharmacies', checkSession, async (req, res) => {
 });
 
 app.post('/register-pharmacy', checkSession, async (req, res) => {
-    const { pharmacyName,
-        pharmacyLocation,
-        pharmacySpecificLocation,
-        email,
-        phone,
-        password } = req.body;
+    const { pharmacyName, pharmacyLocation, pharmacySpecificLocation, email, phone, password } = req.body;
 
     try {
         const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -238,7 +230,7 @@ app.post('/login-pharmacy', checkSession, async (req, res) => {
 app.get('/blogs', checkSession, async (req, res) => {
     try {
         const blogs = await getBlog(1);
-        console.log(blogs);
+        // console.log(blogs);
         res.render('blogs', { blogs });
     } catch (error) {
         console.error('Error fetching blogs:', error);
@@ -246,7 +238,7 @@ app.get('/blogs', checkSession, async (req, res) => {
     }
 });
 
-app.get('/hospitals', checkSession, async (req, res) => {
+app.get('/hospitals', async (req, res) => {
     try {
         const result = await pool.query('SELECT hospital_name, hospital_url FROM hospitals');
         const hospitals = result.rows;
@@ -255,6 +247,21 @@ app.get('/hospitals', checkSession, async (req, res) => {
     } catch (error) {
         console.error('Error fetching hospital data from PostgreSQL database:', error);
         res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.post('/orders', async (req, res) => {
+    const { pharmacyName, pharmacyLocation, pharmacyPhone, patientPhone, agreement } = req.body;
+    const userId = req.session.user.id; // Assuming the user id is stored in the session
+
+    try {
+        const result = await pool.query('INSERT INTO orders (pharmacy_name, pharmacy_location, pharmacy_phone, patient_phone, agreement, user_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+            [pharmacyName, pharmacyLocation, pharmacyPhone, patientPhone, agreement, userId]);
+
+        res.status(201).json({ success: true, order: result.rows[0] });
+    } catch (error) {
+        console.error('Error inserting order:', error);
+        res.status(500).json({ success: false, error: 'Failed to insert order' });
     }
 });
 
