@@ -87,33 +87,30 @@
                                 try {
                                     // Create user data object
                                     let userData = {
-                                        name: nameValue,
+                                        fullName: nameValue,
                                         email: emailValue,
                                         phone: phoneValue,
                                         password: passwordValue
                                     };
 
-                                    // console.log(userData);
+                           const res = await fetch('/register', {
+    method: "POST",
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(userData)
+});
 
-                                    // Send registration data to server
-                                    const res = await fetch('/register', {
-                                        method: "POST",
-                                        headers: {
-                                            'Content-Type': 'application/json'
-                                        },
-                                        body: JSON.stringify(userData)
-                                    });
+const response = await res.json();
 
-                                    const response = await res.json();
-
-                                    if (response.ok) {
-                                        alert("Registration successful!");
-                                        // Redirect to login page or perform other actions after successful registration
-                                        window.location.href = "login.html";
-                                    } else {
-                                        alert("Registration failed. Please try again.");
-                                    }
-                                } catch (error) {
+if (response.success) { // Check for the success property
+    alert("Registration successful!");
+    // Redirect to login page or perform other actions after successful registration
+    window.location.href = "login.html";
+} else {
+    alert("Registration failed. Please try again.");
+}
+                        } catch (error) {
                                     console.error("Error during registration:", error);
                                     alert("An error occurred. Please try again later.");
                                 }

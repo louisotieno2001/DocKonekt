@@ -38,13 +38,13 @@
         }
 
         .card {
-            border: 1px solid #424242;
+            border: none;
             color: aliceblue;
             padding: 10px;
             border-radius: 5px;
             margin: 15px;
-            width: 90%;
-            background-color: #212121;
+            width: 92%;
+            background-color: #4CAF50;
             box-sizing: border-box;
         }
 
@@ -87,7 +87,7 @@
 
 
         button {
-            background-color: #4CAF50;
+            background-color: #1B5E20;
             color: white;
             padding: 10px;
             border: none;
@@ -136,7 +136,7 @@
     <div class="booking">
         <div class="pharmacy-container" id="pharmacy-container">
             <p
-                style="padding-top: 50px; padding: 5px; margin: 5px; color: aliceblue; background-color: #216161; border-bottom-left-radius:8px ; border-bottom-right-radius: 8px;">
+                style="padding-top: 50px; padding: 5px; margin: 5px; color: aliceblue; background-color: #81C784; border-bottom-left-radius:8px ; border-bottom-right-radius: 8px;">
                 <span style="color: red;">NOTE:</span> It is important to contact the pharmacy you are ordering from to
                 inquire if they have the medicine you are
                 looking for before making your order. Dockonekt owns no pharmacies and therefore acts merely as a link
@@ -146,10 +146,8 @@
                 <h3 style="color: red;">Warning! This is an irreversable process, are you sure you want to proceed?</h3>
                 </p>
                 <form action="">
-                    <input type="text" placeholder="Pharmacy name" id="pharmacy-name"> <br>
-                    <input type="text" placeholder="Pharmacy location" id="pharmacy-location">
+                    <input type="text" placeholder="Your location" id="user-location">
                     <input type="tel" placeholder="Your phone number" id="patient-phone"> <br>
-                    <input type="tel" placeholder="Pharmacy phone number" id="pharmacy-phone"> <br>
                     <label for="option">Do you agree to be through using this phone number?</label> <br>
                     <input type="text" placeholder="Yes/No" id="agreement">
                 </form>
@@ -209,8 +207,10 @@
 
                         const button = document.createElement('button');
                         button.textContent = `Order with ${pharmacy.pharmacy_name}`;
+                        button.dataset.pharmacyId = pharmacy.id;
                         button.addEventListener('click', async (e) => {
                             e.preventDefault();
+                            const pharmacyId = e.target.dataset.pharmacyId;
                             alert(`Order medicine with ${pharmacy.pharmacy_name}`);
 
                             const dialog = document.querySelector("dialog");
@@ -220,13 +220,11 @@
 
                             proceedButton.addEventListener("click", async (e) => {
                                 e.preventDefault();
-                                const pharmacyName = document.getElementById('pharmacy-name').value.trim();
-                                const pharmacyLocation = document.getElementById('pharmacy-location').value.trim();
-                                const pharmacyPhone = document.getElementById('pharmacy-phone').value.trim();
+                                const userLocation = document.getElementById('user-location').value.trim();
                                 const patientPhone = document.getElementById('patient-phone').value.trim();
                                 const agreement = document.getElementById('agreement').value.trim();
 
-                                if (!pharmacyName || !pharmacyLocation || !pharmacyPhone || !patientPhone || !agreement) {
+                                if (!userLocation ||!patientPhone || !agreement) {
                                     alert("All fields are required");
                                 }
                                 else {
@@ -238,14 +236,14 @@
                                                 'Content-Type': 'application/json'
                                             },
                                             body: JSON.stringify({
-                                                pharmacyName,
-                                                pharmacyLocation,
-                                                pharmacyPhone,
+                                                pharmacyId,
+                                                userLocation,
                                                 patientPhone,
                                                 agreement
                                             })
                                         });
                                         const data = await response.json();
+                                        console.log(data);
                                         alert("Order placed successfully, wait while we process your order");
                                         dialog.close();
                                     } catch (error) {

@@ -25,5 +25,6 @@
     "pg": "^8.11.3",
     "pg-promise": "^11.5.4",
     "pool": "^0.4.1"
-  }
+  },
+  "devDependencies": {}
 }

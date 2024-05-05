@@ -96,6 +96,7 @@ app.post('/register', async (req, res) => {
             'INSERT INTO users (name, email, phone, password) VALUES ($1, $2, $3, $4) RETURNING *',
             [fullName, email, phone, hashedPassword]
         );
+        console.log(result);
 
         if (result.rows.length > 0) {
             res.status(201).json({ success: true, user: result.rows[0] });
@@ -165,7 +166,7 @@ app.post('/messages', checkSession, async (req, res) => {
 
 app.get('/pharmacies', checkSession, async (req, res) => {
     try {
-        const result = await pool.query('SELECT pharmacy_name, pharmacy_location, pharmacy_specific_location, phone FROM pharmacists');
+        const result = await pool.query('SELECT id, pharmacy_name, pharmacy_location, pharmacy_specific_location, phone FROM pharmacists');
         const pharmacies = result.rows;
 
         // console.log('Pharmacies:', pharmacies);
@@ -210,11 +211,14 @@ app.post('/login-pharmacy', checkSession, async (req, res) => {
         const result = await pool.query('SELECT * FROM pharmacists WHERE email = $1', [email]);
 
         if (result.rows.length > 0) {
-            const user = result.rows[0];
-            const isPasswordMatch = await bcrypt.compare(password, user.password);
+            const pharmacists = result.rows[0];
+            const isPasswordMatch = await bcrypt.compare(password, pharmacists.password);
 
             if (isPasswordMatch) {
-                res.json({ success: true, user });
+                // Store pharmacist information in the session
+                req.session.pharmacists = pharmacists;
+
+                res.json({ success: true, pharmacists });
             } else {
                 res.status(401).json({ success: false, error: 'Invalid credentials' });
             }
@@ -251,17 +255,36 @@ app.get('/hospitals', async (req, res) => {
 });
 
 app.post('/orders', async (req, res) => {
-    const { pharmacyName, pharmacyLocation, pharmacyPhone, patientPhone, agreement } = req.body;
-    const userId = req.session.user.id; // Assuming the user id is stored in the session
+    const { userLocation, patientPhone, agreement , pharmacyId} = req.body;
+    const userId = req.session.user.id; 
 
     try {
-        const result = await pool.query('INSERT INTO orders (pharmacy_name, pharmacy_location, pharmacy_phone, patient_phone, agreement, user_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-            [pharmacyName, pharmacyLocation, pharmacyPhone, patientPhone, agreement, userId]);
+        const result = await pool.query('INSERT INTO orders (user_location, patient_phone, agreement, user_id, pharmacy_id) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [ userLocation, patientPhone, agreement, userId, pharmacyId]);
 
         res.status(201).json({ success: true, order: result.rows[0] });
     } catch (error) {
         console.error('Error inserting order:', error);
         res.status(500).json({ success: false, error: 'Failed to insert order' });
+    }
+});
+
+app.get('/get-orders', checkSession, async (req, res) => {
+    const pharmacistId = req.session.pharmacists.id;
+
+    try {
+        const result = await pool.query(`
+            SELECT orders.*, users.name AS user_name
+            FROM orders
+            INNER JOIN users ON orders.user_id = users.id
+            WHERE orders.pharmacy_id = $1
+        `, [pharmacistId]);
+        const orders = result.rows;
+
+        res.json(orders);
+    } catch (error) {
+        console.error('Error fetching orders data from PostgreSQL database:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
