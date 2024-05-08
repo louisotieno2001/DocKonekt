@@ -2,60 +2,58 @@
 <html lang="en">
 
 <head>
-    <link rel="icon" href="./res/Picture4.png" type="image/x-icon">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>Toggleable Tabs</title>
     <link rel="stylesheet" href="styles/index.css">
     <link rel="stylesheet" href="styles/small-devices.css">
     <style>
-        /* Card styling */
-        .order-card:hover {
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        body {
+            padding: 1em;
         }
 
-        .order-card {
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        /* Style for tab buttons */
+        .tab-btn {
+            cursor: pointer;
+            padding: 10px 20px;
+            border-bottom: none;
+            background-color: #b9f6ca;
+            border-top-right-radius: 10px;
+        }
+
+        /* Style for active tab button */
+        .active {
+            background-color: #ccc;
+        }
+
+        /* Style for tab content */
+        .tab-content {
+            display: none;
             padding: 20px;
-            margin: 10px;
-            margin-top: 0px;
-            background-color: #1B5E20;
-            transition: box-shadow 0.3s ease;
-            max-width: 350px;
-            /* Adjust as needed */
-            color: aliceblue;
+            border: 1px solid #616161;
+            background-color: #212121;
+            border-radius: 8px;
+            border-top-left-radius: 0px;
         }
 
-        #orders-container {
-            background-color: rgb(34, 36, 51);
-            padding-top: 2em;
+        /* Show active tab content */
+        .active-content {
+            display: block;
         }
 
-        /* Media query for responsiveness */
-        @media (min-width: 768px) {
-            #orders-container {
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: space-between;
-            }
-
-            .order-card {
-                width: calc(25% - 20px);
-                /* Adjust margin */
-                /* margin-bottom: 20px; */
-                margin-top: 0px;
-            }
-
-            #top_bar {
-                margin-top: 0;
-            }
+        /* Style for order card */
+        .order-card {
+            background-color: #fff; /* White background */
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
 
 <body>
-    <div class="top_bar" id="top_bar">
+    <div class="top_bar">
         <img src="./res/Picture4.png" alt="logo" class="logo">
         <ul class="menu-items" id="menu-items">
             <li><a href="home.html" title="Home page">Home</a></li>
@@ -70,10 +68,38 @@
             <img src="./res/photo.avif" alt="Profile image">
         </div>
     </div>
-    <div id="orders-container">
-        <!-- Orders will be dynamically added here -->
+    <div class="blogtitle"></div>
+    <div class="tab">
+        <button class="tab-btn active" onclick="toggleTab(event, 'tab1')">Orders</button>
+        <button class="tab-btn" onclick="toggleTab(event, 'tab2')">Prescriptions</button>
     </div>
+
+    <div id="tab1" class="tab-content active-content">
+        <div id="orders-container">
+            <!-- Orders will be dynamically added here -->
+        </div>
+    </div>
+
+    <div id="tab2" class="tab-content">
+        <h3>Tab 2 Content</h3>
+        <p>This is the content of Tab 2.</p>
+    </div>
+
     <script>
+        function toggleTab(event, tabId) {
+            // Hide all tab content and remove active class from tab buttons
+            const tabContents = document.querySelectorAll('.tab-content');
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            tabContents.forEach(content => content.classList.remove('active-content'));
+            tabBtns.forEach(btn => btn.classList.remove('active'));
+
+            // Show the clicked tab content and add active class to the clicked tab button
+            const targetContent = document.getElementById(tabId);
+            const targetBtn = event.currentTarget;
+            targetContent.classList.add('active-content');
+            targetBtn.classList.add('active');
+        }
+
         document.addEventListener('DOMContentLoaded', async function () {
             try {
                 const response = await fetch('/get-orders');
@@ -116,6 +142,7 @@
             profile.addEventListener('click', async (e) => {
                 window.location.href = 'profile';
             })
+
         });
     </script>
 </body>
