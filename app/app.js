@@ -270,7 +270,7 @@ app.post('/login-pharmacy', checkSession, async (req, res) => {
 app.get('/blogs', checkSession, async (req, res) => {
     try {
         const blogs = await getBlog(1);
-        // console.log(blogs);
+        console.log(blogs);
         res.render('blogs', { blogs });
     } catch (error) {
         console.error('Error fetching blogs:', error);
