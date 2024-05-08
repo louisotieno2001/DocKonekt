@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="styles/index.css">
     <link rel="stylesheet" href="styles/small-devices.css">
     <style>
-        body {
+        .presentation {
             padding: 1em;
         }
 
@@ -69,22 +69,22 @@
         </div>
     </div>
     <div class="blogtitle"></div>
-    <div class="tab">
-        <button class="tab-btn active" onclick="toggleTab(event, 'tab1')">Orders</button>
-        <button class="tab-btn" onclick="toggleTab(event, 'tab2')">Prescriptions</button>
-    </div>
-
-    <div id="tab1" class="tab-content active-content">
-        <div id="orders-container">
-            <!-- Orders will be dynamically added here -->
+    <div class="presentation">
+        <div class="tab">
+            <button class="tab-btn active" onclick="toggleTab(event, 'tab1')">Orders</button>
+            <button class="tab-btn" onclick="toggleTab(event, 'tab2')">Prescriptions</button>
+        </div>
+        <div id="tab1" class="tab-content active-content">
+            <div id="orders-container">
+                <!-- Orders will be dynamically added here -->
+            </div>
+        </div>
+        <div id="tab2" class="tab-content">
+          <div id="prespcription">
+            <!-- Prescriptions -->
+          </div>
         </div>
     </div>
-
-    <div id="tab2" class="tab-content">
-        <h3>Tab 2 Content</h3>
-        <p>This is the content of Tab 2.</p>
-    </div>
-
     <script>
         function toggleTab(event, tabId) {
             // Hide all tab content and remove active class from tab buttons
