@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- SEO Meta Tags -->
+    <meta name="description"
+        content="Welcome to DocKonekt. Search for your hospital below or scroll down to pick a hospital.">
+    <meta name="keywords" content="DocKonekt, hospital, health, search">
+    <meta name="author" content="Futurion Labs">
+
+    <!-- Open Graph Protocol for Social Media Sharing -->
+    <meta property="og:title" content="DocKonekt">
+    <meta property="og:description"
+        content="Welcome to DocKonekt. Search for your hospital below or scroll down to pick a hospital.">
+    <meta property="og:image" content="https://dockonekt.com/app/public/res/Picture4.png">
+    <meta property="og:url" content="https://dockonekt.com">
+    <meta property="og:type" content="website">
+
+    <!-- Twitter Card for Twitter Sharing -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@louiso_chieng1">
+    <meta name="twitter:title" content="DocKonekt">
+    <meta name="twitter:description"
+        content="Welcome to DocKonekt. Search for your hospital below or scroll down to pick a hospital.">
+    <meta name="twitter:image" content="https://dockonekt.com/app/public/res/Picture4.png">
+    <link rel="icon" href="./res/Picture4.png" type="image/x-icon">
+    <link rel="stylesheet" href="styles/index.css">
+    <title>Petition</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            /* Horizontally center */
+            align-items: center;
+            /* Vertically center */
+            height: 100vh;
+            /* Full viewport height */
+            margin: 0;
+            /* Remove default margin */
+        }
+
+        .exp {
+            width: 400px;
+            /* Adjust width as needed */
+            padding: 20px;
+            background-color: aliceblue;
+            text-align: center;
+            border-radius: 5px;
+        }
+
+        .button-65 {
+            margin: 2em;
+        }
+
+        label {
+            color: black;
+        }
+
+        textarea {
+            font-weight: 500;
+            font-family: sans-serif;
+            background-color: #212121;
+            color: aliceblue;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="exp">
+        <label for="paragragh">Write a short explanation why your name is yours:</label> <br>
+        <textarea name="paragragh" id="txt" cols="30" rows="10" id="text"></textarea>
+        <input type="button" value="Submit" class="button-65" id="submit">
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const submitBtn = document.getElementById('submit');
+            const text = document.getElementById('txt');
+            const textValue = text.value.trim();
+
+            submitBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+
+                if (textValue === "") {
+                    alert("The field is required")
+                } else {
+                    try {
+
+                        let textContent = {
+                            text: textValue
+                        };
+
+                        const res = await fetch('/petition', {
+                            method: "POST",
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(textContent)
+                        });
+
+                        const response = await res.json();
+
+                        console.log(response);
+
+                        if (res.ok) { 
+                            // Check for the success property
+                            alert("Petition successful!");
+                            window.location.href = "/index.html";
+                        } else {
+                            alert("Failed. Please try again.");
+                        }
+                    } catch (error) {
+                        console.error("Error during registration:", error);
+                        alert("An error occurred. Please try again later.");
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

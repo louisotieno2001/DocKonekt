@@ -27,7 +27,6 @@
     <meta name="twitter:description" content="Welcome to DocKonekt. Search for your hospital below or scroll down to pick a hospital.">
     <meta name="twitter:image" content="https://dockonekt.com/app/public/res/Picture4.png">
 </head>
-</head>
 <body>
     <div class="top_bar">
         <img src="./res/Picture4.png" alt="logo" class="logo">
@@ -40,7 +39,7 @@
             <li><a href="user-type.html" title="Register your pharmacy with us">My Pharma</a></li>
         </ul>
         <img src="./res/menu_icon.png" alt="menu_icon" class="menu_icon" id="menu_icon">
-        <div class="profile">
+        <div class="profile" id="profile">
             <img src="./res/photo.avif" alt="Profile image">
         </div>
     </div>
@@ -140,7 +139,13 @@
                             console.error('Error searching hospitals:', error);
                         }
                     }
-                });   
+                });  
+                
+                const profile = document.getElementById('profile');
+
+                profile.addEventListener('click', async (e) =>{
+                    window.location.href='profile';
+                })
             });
         </script>
     </div>

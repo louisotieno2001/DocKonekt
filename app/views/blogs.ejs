@@ -49,7 +49,7 @@
             <li><a href="user-type.html" title="Register your pharmacy with us">My Pharma</a></li>
         </ul>
         <img src="./res/menu_icon.png" alt="menu_icon" class="menu_icon" id="menu_icon">
-        <div class="profile">
+        <div class="profile" id="profile">
             <img src="./res/photo.avif" alt="Profile image">
         </div>
     </div>
@@ -71,11 +71,16 @@
                 <p>Follow us on social media below</p>
             </center>
             <div class="socials">
-                <li class="socials_lin"><a href="https://www.linkedin.com/in/dockonekt-dcofficial-3892062bb/" target="_blank"><img src="res/linkedin.png" alt="LinkedIn"></a></li>
-                <li class="socials_fb"><a href="https://www.facebook.com/profile.php?id=61551541325742" target="_blank"><img src="res/Facebook.png" alt="Facebook"></a></li>
-                <li class="socials_ig"><a href="https://www.instagram.com/futurion_labs123/" target="_blank"><img src="res/Instagram.png" alt="Instagram"></a></li>
-                <li class="socials_wa"><a href="https://wa.me/254746852485" target="_blank"><img src="res/icon-whatsapp.webp" alt="Whatsapp"></a></li>
-                <li class="socials_tw"><a href="https://twitter.com/doconektoficial" target="_blank"><img src="res/x.jpg" alt="twitter"></a></li>
+                <li class="socials_lin"><a href="https://www.linkedin.com/in/dockonekt-dcofficial-3892062bb/"
+                        target="_blank"><img src="res/linkedin.png" alt="LinkedIn"></a></li>
+                <li class="socials_fb"><a href="https://www.facebook.com/profile.php?id=61551541325742"
+                        target="_blank"><img src="res/Facebook.png" alt="Facebook"></a></li>
+                <li class="socials_ig"><a href="https://www.instagram.com/futurion_labs123/" target="_blank"><img
+                            src="res/Instagram.png" alt="Instagram"></a></li>
+                <li class="socials_wa"><a href="https://wa.me/254746852485" target="_blank"><img
+                            src="res/icon-whatsapp.webp" alt="Whatsapp"></a></li>
+                <li class="socials_tw"><a href="https://twitter.com/doconektoficial" target="_blank"><img
+                            src="res/x.jpg" alt="twitter"></a></li>
             </div>
             <p>Copyright&copy;2024 Made at <a href="https://futurionlab.com"> Futurion Labs</a>. All rights reserved</p>
         </footer>
@@ -88,6 +93,12 @@
             menuIcon.addEventListener('click', function () {
                 menuItems.classList.toggle('show');
             });
+
+            const profile = document.getElementById('profile');
+
+            profile.addEventListener('click', async (e) => {
+                window.location.href = 'profile';
+            })
         });
     </script>
 </body>

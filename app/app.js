@@ -120,11 +120,21 @@ app.post('/login', async (req, res) => {
             const user = result.rows[0];
             const isPasswordMatch = await bcrypt.compare(password, user.password);
 
+            // console.log(user);
+
             if (isPasswordMatch) {
                 // Store user information in the session
                 req.session.user = user;
 
-                res.json({ success: true, user });
+                // Check if the user's 'checked' field is true
+                // Check if the user's 'checked' field is true
+                if (user.checked === true) {
+                    // Send a JSON response indicating success and the redirect URL
+                    res.json({ success: true, redirect: '/guideline' });
+                } else {
+                    // Send a JSON response indicating success and the redirect URL
+                    res.json({ success: true, redirect: '/home.html' });
+                }
             } else {
                 res.status(401).json({ success: false, error: 'Invalid credentials' });
             }
@@ -151,7 +161,7 @@ app.post('/messages', checkSession, async (req, res) => {
         const result = await pool.query(query, values);
         const insertedRow = result.rows[0];
 
-        console.log(result);
+        // console.log(result);
 
         // Send a response indicating successful insertion
         res.status(201).json({
@@ -174,6 +184,32 @@ app.get('/pharmacies', checkSession, async (req, res) => {
     } catch (error) {
         console.error('Error fetching schedule data from PostgreSQL database:', error);
         res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.get('/petition', checkSession, (req, res) => {
+    res.render('petition');
+});
+
+app.post('/petition', checkSession, async (req, res) => {
+    try {
+        const { text } = req.body;
+
+        const query =
+            'INSERT INTO petition (text) VALUES ($1) RETURNING id';
+        const values = [text];
+
+        // Execute the query and get the inserted row's ID
+        const result = await pool.query(query, values);
+        const insertedRow = result.rows[0];
+
+        res.status(201).json({
+            message: 'Data inserted successfully',
+            insertedRowId: insertedRow.id,
+        });
+    } catch (error) {
+        console.error('Error while inserting data:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 });
 
@@ -242,6 +278,62 @@ app.get('/blogs', checkSession, async (req, res) => {
     }
 });
 
+app.get('/profile', checkSession, async (req, res) => {
+    try {
+        // Retrieve user ID from session or any other means of identification
+        const userId = req.session.user.id; // Assuming you store the user ID in the session
+        // console.log(userId);
+
+        // Query to retrieve user information from the database using the user ID
+        const query = 'SELECT name, phone, email FROM users WHERE id = $1';
+        const result = await pool.query(query, [userId]);
+        // console.log(result);
+        // If user not found in the database
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Extract necessary information from the result
+        const { name, phone, email } = result.rows[0];
+
+        // console.log(result.rows[0]);
+
+        // Render profile template and pass user's information to it
+        res.render('profile', { name, phone, email });
+    } catch (error) {
+        console.error('Error fetching profile data:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.get('/guideline', checkSession, async (req, res) => {
+    try {
+        // Retrieve user ID from session or any other means of identification
+        const userId = req.session.user.id; // Assuming you store the user ID in the session
+        // console.log(userId);
+
+        // Query to retrieve user information from the database using the user ID
+        const query = 'SELECT name FROM users WHERE id = $1';
+        const result = await pool.query(query, [userId]);
+        // console.log(result);
+        // If user not found in the database
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Extract necessary information from the result
+        const { name } = result.rows[0];
+
+        // console.log(result.rows[0]);
+
+        // Render profile template and pass user's information to it
+        res.render('guideline', { name });
+    } catch (error) {
+        console.error('Error fetching profile data:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 app.get('/hospitals', async (req, res) => {
     try {
         const result = await pool.query('SELECT hospital_name, hospital_url FROM hospitals');
@@ -255,12 +347,12 @@ app.get('/hospitals', async (req, res) => {
 });
 
 app.post('/orders', async (req, res) => {
-    const { userLocation, patientPhone, agreement , pharmacyId} = req.body;
-    const userId = req.session.user.id; 
+    const { userLocation, patientPhone, agreement, pharmacyId } = req.body;
+    const userId = req.session.user.id;
 
     try {
         const result = await pool.query('INSERT INTO orders (user_location, patient_phone, agreement, user_id, pharmacy_id) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-            [ userLocation, patientPhone, agreement, userId, pharmacyId]);
+            [userLocation, patientPhone, agreement, userId, pharmacyId]);
 
         res.status(201).json({ success: true, order: result.rows[0] });
     } catch (error) {
@@ -287,6 +379,56 @@ app.get('/get-orders', checkSession, async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+app.post('/edit-name', checkSession, async (req, res) => {
+    const { newName } = req.body;
+    const userId = req.session.user.id;
+
+    try {
+        // Update the user's name in the database
+        const result = await pool.query(
+            'UPDATE users SET name = $1 WHERE id = $2 RETURNING *',
+            [newName, userId]
+        );
+
+        if (result.rows.length > 0) {
+            const updatedUser = result.rows[0];
+            req.session.user = updatedUser; // Update user session information if needed
+            res.status(200).json({ success: true, user: updatedUser });
+        } else {
+            res.status(404).json({ success: false, error: 'User not found' });
+        }
+    } catch (error) {
+        console.error('Error updating user name:', error);
+        res.status(500).json({ success: false, error: 'Failed to update user name' });
+    }
+});
+
+app.post('/edit-phone', checkSession, async (req, res) => {
+    const { newPhone } = req.body;
+    const userId = req.session.user.id;
+
+    try {
+        // Update the user's phone number in the database
+        const result = await pool.query(
+            'UPDATE users SET phone = $1 WHERE id = $2 RETURNING *',
+            [newPhone, userId]
+        );
+
+        if (result.rows.length > 0) {
+            const updatedUser = result.rows[0];
+            req.session.user = updatedUser; // Update user session information if needed
+            res.status(200).json({ success: true, user: updatedUser });
+        } else {
+            res.status(404).json({ success: false, error: 'User not found' });
+        }
+    } catch (error) {
+        console.error('Error updating user phone number:', error);
+        res.status(500).json({ success: false, error: 'Failed to update user phone number' });
+    }
+});
+
+
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

@@ -128,7 +128,7 @@
             <li><a href="user-type.html" title="Register your pharmacy with us">My Pharma</a></li>
         </ul>
         <img src="./res/menu_icon.png" alt="menu_icon" class="menu_icon" id="menu_icon">
-        <div class="profile">
+        <div class="profile" id="profile">
             <img src="./res/photo.avif" alt="Profile image">
         </div>
     </div>
@@ -224,7 +224,7 @@
                                 const patientPhone = document.getElementById('patient-phone').value.trim();
                                 const agreement = document.getElementById('agreement').value.trim();
 
-                                if (!userLocation ||!patientPhone || !agreement) {
+                                if (!userLocation || !patientPhone || !agreement) {
                                     alert("All fields are required");
                                 }
                                 else {
@@ -277,6 +277,12 @@
             menuIcon.addEventListener('click', function () {
                 menuItems.classList.toggle('show');
             });
+
+            const profile = document.getElementById('profile');
+
+            profile.addEventListener('click', async (e) => {
+                window.location.href = 'profile';
+            })
         });
     </script>
 </body>

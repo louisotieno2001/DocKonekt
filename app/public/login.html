@@ -89,11 +89,17 @@
 
                                     const result = await response.json();
 
+                                    console.log(result);
+
                                     if (result.success) {
                                         window.confirm('Login successful!');
-                                        window.location.href = "home.html";
+                                        window.location.href = result.redirect || "home.html";
                                     } else {
-                                        window.confirm('Login failed. Check your credentials.');
+                                        if (result.error) {
+                                            alert(result.error); // Display specific error message from the backend
+                                        } else {
+                                            alert('Login failed. Check your credentials.');
+                                        }
                                     }
                                 } catch (error) {
                                     console.error('Error during login:', error);

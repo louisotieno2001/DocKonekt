@@ -55,7 +55,8 @@
                     <label for="phone">Phone: </label>
                     <input type="tel" name="phone" id="phone" required autocomplete="phone" placeholder="0711223344">
                     <label for="password">Password</label>
-                    <input type="password" name="password" id="password" required autocomplete="current-password" placeholder="Password">
+                    <input type="password" name="password" id="password" required autocomplete="current-password"
+                        placeholder="Password">
                     Show Password<input type="checkbox" id="showPassword">
                     <button type="button" class="register" id="submit">Register</button>
                     <p class="alt_account">Already have an account? <a href="login.html" id="login-link">Login</a></p>
@@ -93,24 +94,24 @@
                                         password: passwordValue
                                     };
 
-                           const res = await fetch('/register', {
-    method: "POST",
-    headers: {
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(userData)
-});
+                                    const res = await fetch('/register', {
+                                        method: "POST",
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify(userData)
+                                    });
 
-const response = await res.json();
+                                    const response = await res.json();
 
-if (response.success) { // Check for the success property
-    alert("Registration successful!");
-    // Redirect to login page or perform other actions after successful registration
-    window.location.href = "login.html";
-} else {
-    alert("Registration failed. Please try again.");
-}
-                        } catch (error) {
+                                    if (response.success) { // Check for the success property
+                                        alert("Registration successful!");
+                                        // Redirect to login page or perform other actions after successful registration
+                                        window.location.href = "login.html";
+                                    } else {
+                                        alert("Registration failed. Please try again.");
+                                    }
+                                } catch (error) {
                                     console.error("Error during registration:", error);
                                     alert("An error occurred. Please try again later.");
                                 }
