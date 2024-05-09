@@ -11,6 +11,8 @@ const Fuse = require('fuse.js');
 const cors = require('cors');
 const ejs = require('ejs');
 const app = express();
+const nodemailer = require('nodemailer');
+const moment = require('moment');
 const axios = require('axios');
 const port = process.env.PORT || 3000;
 const saltRounds = 10; // Number of salt rounds for bcrypt
@@ -33,6 +35,17 @@ const pool = new Pool({
     port: process.env.DB_PORT,
     ssl: { rejectUnauthorized: false },
 });
+
+const transporter = nodemailer.createTransport({
+    host: 'smtp.dockonekt.com', // Your SMTP server details
+    port: 587,
+    auth: {
+        user: 'customers-service@dockonekt.com',
+        pass: '',
+    },
+});
+
+const verificationCodes = {}; // { email: code }
 
 app.use(session({
     store: new pgSession({
@@ -120,13 +133,10 @@ app.post('/login', async (req, res) => {
             const user = result.rows[0];
             const isPasswordMatch = await bcrypt.compare(password, user.password);
 
-            // console.log(user);
-
             if (isPasswordMatch) {
                 // Store user information in the session
                 req.session.user = user;
 
-                // Check if the user's 'checked' field is true
                 // Check if the user's 'checked' field is true
                 if (user.checked === true) {
                     // Send a JSON response indicating success and the redirect URL
@@ -160,8 +170,6 @@ app.post('/messages', checkSession, async (req, res) => {
         // Execute the query and get the inserted row's ID
         const result = await pool.query(query, values);
         const insertedRow = result.rows[0];
-
-        // console.log(result);
 
         // Send a response indicating successful insertion
         res.status(201).json({
@@ -428,6 +436,13 @@ app.post('/edit-phone', checkSession, async (req, res) => {
     }
 });
 
+app.post('/search', async (req, res) => {
+
+});
+
+app.get('/confirmation', async (req, res) => {
+  res.render('confirmation');
+});
 
 
 app.listen(port, () => {
