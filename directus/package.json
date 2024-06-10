@@ -1,14 +1,14 @@
 {
   "name": "directus",
   "version": "1.0.0",
-  "description": "directus",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
+  "description": "",
   "dependencies": {
-    "pg": "^8.11.3"
+    "pg": "^8.11.5"
   }
 }
