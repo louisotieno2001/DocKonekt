@@ -4,10 +4,13 @@
         margin: 0;
         padding: 0;
         height: 100vh;
+        background-color: rgb(34, 36, 51);
     }
 
     .menu_icon{
         display: block;
+        color: #fff;
+        margin-left: 15px;
     }
     
     .top_bar{
@@ -29,22 +32,24 @@
         margin:5px 5px;
         width: 45px;
         height: 45px;
+        color: #fff;
     }
 
     .profile{
         margin-top: 5px;
-        margin-right:-15px;
+        margin-right:5px;
     }
 
     .logo{
         margin: 4px;
+        display: none;
     }
 
     .top_bar ul {
         list-style: none;
         padding: 0;
         margin: 0;
-        text-align: center;
+        text-align: left;
         display: none;
     }
     
@@ -101,6 +106,7 @@
         padding: 1em;
         border-radius: 5px;
         background-color: rgb(34, 36, 51);
+        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
         margin-left: 10px;
         margin-right: 10px;
         margin-top: 5px;

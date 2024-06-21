@@ -8,13 +8,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile</title>
     <!-- SEO Meta Tags -->
-    <meta name="description" content="Welcome to DocKonekt. Search for your hospital below or scroll down to pick a hospital.">
+    <meta name="description"
+        content="Welcome to DocKonekt. Search for your hospital below or scroll down to pick a hospital.">
     <meta name="keywords" content="DocKonekt, hospital, health, search">
     <meta name="author" content="Futurion Labs">
 
     <!-- Open Graph Protocol for Social Media Sharing -->
     <meta property="og:title" content="DocKonekt">
-    <meta property="og:description" content="Welcome to DocKonekt. Search for your hospital below or scroll down to pick a hospital.">
+    <meta property="og:description"
+        content="Welcome to DocKonekt. Search for your hospital below or scroll down to pick a hospital.">
     <meta property="og:image" content="https://dockonekt.com/app/public/res/Picture4.png">
     <meta property="og:url" content="https://dockonekt.com">
     <meta property="og:type" content="website">
@@ -23,11 +25,12 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@louiso_chieng1">
     <meta name="twitter:title" content="DocKonekt">
-    <meta name="twitter:description" content="Welcome to DocKonekt. Search for your hospital below or scroll down to pick a hospital.">
+    <meta name="twitter:description"
+        content="Welcome to DocKonekt. Search for your hospital below or scroll down to pick a hospital.">
     <meta name="twitter:image" content="https://dockonekt.com/app/public/res/Picture4.png">
-    <link rel="stylesheet" href="styles/index.css">
-    <link rel="stylesheet" href="styles/small-devices.css">
-    <link rel="icon" href="./res/Picture4.png" type="image/x-icon">
+    <link rel="stylesheet" href="/styles/index.css">
+    <link rel="stylesheet" href="/styles/small-devices.css">
+    <link rel="icon" href="/res/Picture4.png" type="image/x-icon">
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <style>
@@ -60,15 +63,13 @@
             display: flex;
             justify-content: center;
             cursor: pointer;
-        }
-
-        .profile-pic img {
+            background-color: rgb(14, 14, 27);
             width: 120px;
             height: 120px;
             border-radius: 50%;
+            margin-left: 80px;
             background-position: center;
             background-size: cover;
-            padding: 2em;
         }
 
         .info {
@@ -112,6 +113,73 @@
             margin-top: .5em;
             padding: .8em;
         }
+
+        .profile-info {
+            width: 300px;
+            padding: 20px;
+            background-color: rgb(34, 36, 51);
+            color: white;
+            box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin: auto;
+        }
+
+        .preview {
+            height: 40px;
+            width: 40px;
+            display: none;
+            margin: 20 auto;
+            border-radius: 8px;
+            z-index: 1000;
+            border: #36211b 1px;
+            border-radius: 50%;
+        }
+
+        .button-87 {
+            background-color: rgb(23, 24, 34);
+            border: none;
+            color: aliceblue;
+            border-radius: 5px;
+            padding: .8em;
+            cursor: pointer;
+        }
+
+        @media only screen and (max-width: 768px) {
+            .profile-info {
+                width: 250px;
+                padding: 20px;
+                background-color: rgb(34, 36, 51);
+                color: white;
+                box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+                border-radius: 8px;
+                text-align: center;
+                margin: auto;
+            }
+
+            .detail {
+                margin-top: .8em;
+                padding: .2em;
+            }
+
+            span {
+                margin-top: .099em;
+                padding: .4em;
+                cursor: pointer;
+            }
+
+            .profile-pic {
+                margin: 1em;
+                display: flex;
+                justify-content: center;
+                cursor: pointer;
+                background-color: rgb(14, 14, 27);
+                width: 120px;
+                height: 120px;
+                border-radius: 50%;
+                margin-left: 60px;
+            }
+        }
     </style>
 </head>
 
@@ -119,58 +187,66 @@
     <div class="top_bar">
         <img src="./res/Picture4.png" alt="logo" class="logo">
         <ul class="menu-items" id="menu-items">
-            <li><a href="home.html" title="Home page">Home</a></li>
+            <li><a href="/home" title="Home page">Home</a></li>
             <li><a href="/blogs" title="Blogs page">Health Blog</a></li>
-            <li><a href="about_us.html" title="Learn more about us">About Us</a></li>
-            <li><a href="get_in_touch.html" title="Send uus a messaage">Contact Us</a></li>
-            <li><a href="terms.html" title="Look at our terms of service">Terms of service</a></li>
-            <li><a href="user-type.html" title="Register your pharmacy with us">My Pharma</a></li>
+            <li><a href="/about" title="Learn more about us">About Us</a></li>
+            <li><a href="/messages" title="Send uus a messaage">Contact Us</a></li>
+            <li><a href="/terms" title="Look at our terms of service">Terms of service</a></li>
+            <li><a href="/pharmacy/home" title="Register your pharmacy with us">Buy Medicine</a></li>
+            <li><a href="/pharmacy/register" title="Register your pharmacy with us">Log in to pharmacy</a></li>
         </ul>
-        <img src="./res/menu_icon.png" alt="menu_icon" class="menu_icon" id="menu_icon">
-        <div class="profile">
-            <img src="./res/profile.jpg" alt="Profile image">
+        <img src="/res/menu_icon.png" alt="menu_icon" class="menu_icon" id="menu_icon">
+        <div class="profile" id="profile" style="background-image: url('/uploads/<%=  user.profile_pic %>');">
         </div>
     </div>
     <div class="blogtitle"></div>
     <div class="info">
-        <div class="profile-pic" id="profile-pic">
-            <img src="./res/profile.jpg" alt="Profile image" title="Change profile picture" id="placeholder">
-        </div>
-        <div class="uline"></div>
-        <div class="name">
-            <h3>Name: </h3>
-            <div class="detail" id="nameDetail">
-                <%= name %>
+        <div class="profile-info">
+            <div class="profile-pic" id="profile-pic"
+                style="background-image: url('/uploads/<%=  user.profile_pic %>');"></div>
+            <input type="file" id="fileInput" style="display: none;">
+            <div class="preview" id="preview">
+                <button class="button-87" id="edit-pic">Submit</button>
             </div>
-            <form id="editNameForm" style="display: none;">
-                <input type="text" id="nameInput" value="<%= name %>">
-                <button type="submit" id="submitName" class="button-65">Save</button>
-            </form>
-            <span class="material-symbols-outlined" id="edit-name" title="Edit name">edit</span>
-        </div>
-        <div class="phone">
-            <h3>Phone: </h3>
-            <div class="detail" id="phoneDetail">
-                <%= phone %>
+            <div class="uline"></div>
+            <div class="name">
+                <span class="material-symbols-outlined">
+                    person
+                </span>
+                <div class="detail" id="nameDetail">
+                    <%= user.name %>
+                </div>
+                <form id="editNameForm" style="display: none;">
+                    <input type="text" id="nameInput" value="<%= user.name %>">
+                    <button type="submit" id="submitName" class="button-65">Save</button>
+                </form>
+                <span class="material-symbols-outlined" id="edit-name" title="Edit name">edit</span>
             </div>
-            <form style="display: none;" id="editPhoneForm">
-                <input type="text" id="phoneInput" value="<%= phone %>">
-                <button type="submit" id="submitPhone" class="button-65">Save</button>
-            </form>
-            <span class="material-symbols-outlined" id="edit-phone" title="Edit phone number">edit</span>
-        </div>
+            <div class="phone">
+                <span class="material-symbols-outlined">
+                    phone_enabled
+                </span>
+                <div class="detail" id="phoneDetail">
+                    <%= user.phone %>
+                </div>
+                <form style="display: none;" id="editPhoneForm">
+                    <input type="text" id="phoneInput" value="<%= user.phone %>">
+                    <button type="submit" id="submitPhone" class="button-65">Save</button>
+                </form>
+                <span class="material-symbols-outlined" id="edit-phone" title="Edit phone number">edit</span>
+            </div>
 
-        <!-- <div class="uline"></div> -->
-        <div class="mail">
-            <h3>Email: </h3>
-            <div class="detail">
-                <%= email %>
+            <!-- <div class="uline"></div> -->
+            <div class="mail">
+                <span class="material-symbols-outlined">
+                    mail
+                </span>
+                <div class="detail">
+                    <%= user.email %>
+                </div>
             </div>
-            <span class="material-symbols-outlined" title="Not editable">
-                edit_off
-            </span>
+            <!-- <div class="uline"></div> -->
         </div>
-        <!-- <div class="uline"></div> -->
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -189,9 +265,54 @@
             const phoneInput = document.getElementById('phoneInput');
             const profImage = document.getElementById('placeholder');
             const profile = document.getElementById('profile-pic');
+            const previewDiv = document.getElementById('preview');
+            const submitPic = document.getElementById('edit-pic');
+            const fileInput = document.getElementById('fileInput');
 
-            profile.addEventListener('click', () => {
-                
+            profile.addEventListener('click', (e) => {
+                e.preventDefault();
+                fileInput.click();
+                previewDiv.style.display = 'block';
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                const selectedFile = e.target.files[0];
+                if (selectedFile) {
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        profile.style.backgroundImage = `url('${event.target.result}')`;
+                    };
+                    reader.readAsDataURL(selectedFile);
+                }
+            });
+
+
+
+            submitPic.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const selectedFile = fileInput.files[0];
+                if (selectedFile) {
+                    const formData = new FormData();
+                    formData.append('profilePic', selectedFile);
+                    console.log(formData)
+
+                    try {
+                        const response = await fetch('/update-pic', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        if (response.ok) {
+                            const data = await response.json();
+                            alert("Profile updated successfully")
+                        } else {
+                            console.error('Failed to upload image');
+                        }
+                    } catch (error) {
+                        console.error('Error uploading image:', error);
+                    }
+                } else {
+                    console.error('No file selected');
+                }
             });
 
             // Event listeners for edit buttons
@@ -212,11 +333,12 @@
 
                 const nameValue = nameInput.value.trim();
 
+                console.log(nameValue);
+
                 if (nameValue === "") {
-                    alert("The field is required")
+                    alert("The field is required");
                 } else {
                     try {
-
                         let newName = {
                             newName: nameValue
                         };
@@ -231,21 +353,25 @@
 
                         const response = await res.json();
 
-                        if (response.success) { // Check for the success property
-                            alert("Update successful!");
-                            location.reload();
-                            nameDetail.style.display = 'block';
-                            editNameForm.style.display = 'none';
+                        if (res.ok) {
+                            if (response.message === 'Name updated successfully') {
+                                alert("Update successful!");
+                                location.reload(); // Refresh the page or update UI as needed
+                                nameDetail.style.display = 'block';
+                                editNameForm.style.display = 'none';
+                            } else {
+                                alert("Update failed. Please try again.");
+                            }
                         } else {
                             alert("Update failed. Please try again.");
                         }
                     } catch (error) {
-                        console.error("Error during registration:", error);
+                        console.error("Error during name update:", error);
                         alert("An error occurred. Please try again later.");
                     }
                 }
+            });
 
-            })
 
             submitPhone.addEventListener('click', async (e) => {
                 e.preventDefault();
@@ -271,11 +397,16 @@
 
                         const response = await res.json();
 
-                        if (response.success) { // Check for the success property
-                            alert("Update successful!");
-                            location.reload();
-                            nameDetail.style.display = 'block';
-                            editNameForm.style.display = 'none';
+                        if (res.ok) {
+                            if (response.message === 'Phone updated successfully') {
+                                alert("Update successful!");
+                                location.reload();
+                                nameDetail.style.display = 'block';
+                                editNameForm.style.display = 'none';
+                            } else {
+                                alert("Update failed. Please try again.");
+                            }
+
                         } else {
                             alert("Update failed. Please try again.");
                         }

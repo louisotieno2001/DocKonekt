@@ -26,22 +26,31 @@
      <meta name="twitter:title" content="DocKonekt">
      <meta name="twitter:description" content="Welcome to DocKonekt. Search for your hospital below or scroll down to pick a hospital.">
      <meta name="twitter:image" content="https://dockonekt.com/app/public/res/Picture4.png">
+     <style>
+        body{
+            background-color: rgb(34, 36, 51);
+        }
+
+        .terms-body{
+            box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+        }
+     </style>
 </head>
 
 <body>
     <div class="top_bar">
         <img src="./res/Picture4.png" alt="logo" class="logo">
         <ul class="menu-items" id="menu-items">
-            <li><a href="home.html" title="Home page">Home</a></li>
+            <li><a href="/home" title="Home page">Home</a></li>
             <li><a href="/blogs" title="Blogs page">Health Blog</a></li>
-            <li><a href="about_us.html" title="Learn more about us">About Us</a></li>
-            <li><a href="get_in_touch.html" title="Send uus a messaage">Contact Us</a></li>
-            <li><a href="terms.html" title="Look at our terms of service">Terms of service</a></li>
-            <li><a href="user-type.html" title="Register your pharmacy with us">My Pharma</a></li>
+            <li><a href="/about" title="Learn more about us">About Us</a></li>
+            <li><a href="/messages" title="Send uus a messaage">Contact Us</a></li>
+            <li><a href="/terms" title="Look at our terms of service">Terms of service</a></li>
+            <li><a href="/pharmacy/home" title="Register your pharmacy with us">Buy Medicine</a></li>
+            <li><a href="/pharmacy/register" title="Register your pharmacy with us">Log in to pharmacy</a></li>
         </ul>
-        <img src="./res/menu_icon.png" alt="menu_icon" class="menu_icon" id="menu_icon">
-        <div class="profile" id="profile">
-            <img src="./res/profile.jpg" alt="Profile image">
+        <img src="/res/menu_icon.png" alt="menu_icon" class="menu_icon" id="menu_icon">
+        <div class="profile" id="profile" style="background-image: url('/uploads/<%=  user.profile_pic %>');">
         </div>
     </div>
     <div class="blogtitle"></div>
@@ -744,7 +753,7 @@
                 const profile = document.getElementById('profile');
 
                 profile.addEventListener('click', async (e) =>{
-                    window.location.href='profile';
+                    window.location.href='/profile';
                 })
             });
         </script>

@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome</title>
-    <link rel="stylesheet" href="styles/index.css">
-    <link rel="stylesheet" href="styles/small-devices.css">
-    <link rel="icon" href="./res/Picture4.png" type="image/x-icon">
+    <link rel="stylesheet" href="/styles/index.css">
+    <link rel="stylesheet" href="/styles/small-devices.css">
+    <link rel="icon" href="/res/Picture4.png" type="image/x-icon">
     <!-- SEO Meta Tags -->
     <meta name="description"
         content="Welcome to DocKonekt. Search for your hospital below or scroll down to pick a hospital.">
@@ -36,7 +36,7 @@
         <div class="home">
             <div class="left">
                 <div class="text">
-                    <img src="./res/Picture4.png" alt="logo" class="logo">
+                    <img src="/res/Picture4.png" alt="logo" class="logo">
                     <h1> Welcome to DocKonekt</h1>
                     <p>A service offered to make it easier for doctors and patients to connect for consultation
                         purposes.
@@ -55,7 +55,7 @@
                         placeholder="Password">
                         Show Password<input type="checkbox" id="showPassword">
                     <button type="button" id="login-btn" class="login">Login</button>
-                    <p class="alt_account">Don't have an account? <br><a href="registerpharmacy.html"
+                    <p class="alt_account">Don't have an account? <br><a href="/pharmacy/register"
                             id="register-link">Register</a></p>
                 </form>
                 <script>
@@ -79,7 +79,7 @@
                                 };
 
                                 try {
-                                    const response = await fetch('/login-pharmacy', {
+                                    const response = await fetch('/pharmacy-login', {
                                         method: 'POST',
                                         headers: {
                                             'Content-Type': 'application/json',
@@ -89,11 +89,11 @@
 
                                     const result = await response.json();
 
-                                    if (result.success) {
-                                        window.confirm('Login successful!');
-                                        window.location.href = "dashboard.html";
+                                    if (result.message === 'Login successful') {
+                                        alert('Login successful!');
+                                        window.location.href = result.redirect; 
                                     } else {
-                                        window.confirm('Login failed. Check your credentials.');
+                                        alert('Login failed. Consider registering a pharmacy first.');
                                     }
                                 } catch (error) {
                                     console.error('Error during login:', error);

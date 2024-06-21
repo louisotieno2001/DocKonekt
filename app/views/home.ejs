@@ -29,18 +29,18 @@
 </head>
 <body>
     <div class="top_bar">
-        <img src="./res/Picture4.png" alt="logo" class="logo">
+        <img src="/res/Picture4.png" alt="logo" class="logo">
         <ul class="menu-items" id="menu-items">
-            <li><a href="home.html" title="Home page">Home</a></li>
+            <li><a href="/home" title="Home page">Home</a></li>
             <li><a href="/blogs" title="Blogs page">Health Blog</a></li>
-            <li><a href="about_us.html" title="Learn more about us">About Us</a></li>
-            <li><a href="get_in_touch.html" title="Send uus a messaage">Contact Us</a></li>
-            <li><a href="terms.html" title="Look at our terms of service">Terms of service</a></li>
-            <li><a href="user-type.html" title="Register your pharmacy with us">My Pharma</a></li>
+            <li><a href="/about" title="Learn more about us">About Us</a></li>
+            <li><a href="/messages" title="Send uus a messaage">Contact Us</a></li>
+            <li><a href="/terms" title="Look at our terms of service">Terms of service</a></li>
+            <li><a href="/pharmacy/home" title="Register your pharmacy with us">Buy Medicine</a></li>
+            <li><a href="/pharmacy/register" title="Register your pharmacy with us">Log in to pharmacy</a></li>
         </ul>
-        <img src="./res/menu_icon.png" alt="menu_icon" class="menu_icon" id="menu_icon">
-        <div class="profile" id="profile">
-            <img src="./res/profile.jpg" alt="Profile image">
+        <img src="/res/menu_icon.png" alt="menu_icon" class="menu_icon" id="menu_icon">
+        <div class="profile" id="profile" style="background-image: url('/uploads/<%=  user.profile_pic %>');">
         </div>
     </div>
     <div class="home-display">
@@ -99,52 +99,25 @@
                 }
 
                 fetchHospitals();
- 
-                const searchInput = document.querySelector('input[type="text"]');
-                const searchButton = document.querySelector('button.button-65');
-                const hospitalList = document.getElementById('hospitalList');
-        
-                searchButton.addEventListener('click', async () => {
-                    const query = searchInput.value.trim();
-        
-                    if (query) {
-                        try {
-                            const response = await fetch('/search-hospitals', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({ query }),
-                            });
-        
-                            const results = await response.json();
-        
-                            // Clear previous search results
-                            hospitalList.innerHTML = '';
-        
-                            // Display search results
-                            results.forEach(hospital => {
-                                const listItem = document.createElement('li');
-                                const anchor = document.createElement('a');
-        
-                                anchor.textContent = `${hospital.item.hospital_name}`;
-                                anchor.href = hospital.item.hospital_url; // Set the actual URL
-                                anchor.target = '_blank'; // Open the link in a new tab/window
-                                anchor.rel = 'noopener noreferrer';
-        
-                                listItem.appendChild(anchor);
-                                hospitalList.appendChild(listItem);
-                            });
-                        } catch (error) {
-                            console.error('Error searching hospitals:', error);
-                        }
-                    }
-                });  
-                
-                const profile = document.getElementById('profile');
 
+                async function fetchProfile() {
+                    try {
+                        const response = await fetch('/profile');
+                        const data = await response.json();
+            
+                        data.forEach(profile => {
+                        
+        
+                        });
+                    } catch (error) {
+                        console.error('Error fetching hospitals:', error);
+                    }
+                }
+
+                fetchProfile();
+ 
                 profile.addEventListener('click', async (e) =>{
-                    window.location.href='profile';
+                    window.location.href='/profile';
                 })
             });
         </script>

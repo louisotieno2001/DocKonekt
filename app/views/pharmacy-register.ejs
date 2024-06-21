@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome</title>
-    <link rel="stylesheet" href="styles/index.css">
-    <link rel="stylesheet" href="styles/small-devices.css">
-    <link rel="icon" href="./res/Picture4.png" type="image/x-icon">
+    <link rel="stylesheet" href="/styles/index.css">
+    <link rel="stylesheet" href="/styles/small-devices.css">
+    <link rel="icon" href="/res/Picture4.png" type="image/x-icon">
     <!-- SEO Meta Tags -->
     <meta name="description"
         content="Welcome to DocKonekt. Search for your hospital below or scroll down to pick a hospital.">
@@ -36,7 +36,7 @@
         <div class="home">
             <div class="left">
                 <div class="text">
-                    <img src="./res/Picture4.png" alt="logo" class="logo">
+                    <img src="/res/Picture4.png" alt="logo" class="logo">
                     <h1> Welcome to DocKonekt</h1>
                     <p>A service offered to make it easier for doctors and patients to connect for consultation
                         purposes.
@@ -45,28 +45,17 @@
             </div>
             <div class="right">
                 <form id="register-form" method="post">
-                    <h1>Register your pharmacy</h1>
-                    <label for="fname">Pharmacy name: </label>
+                    <h2>Register your pharmacy</h2>
                     <input type="text" name="phname" id="phname" required autocomplete="additional-name"
-                        placeholder="Meds pharmacy">
-                    <label for="fname">Pharmacy location: </label>
+                        placeholder="Pharmacy name">
                     <input type="text" name="phlocation" id="phlocation" required autocomplete="additional-name"
-                        placeholder="Rongai">
-                    <label for="fname">Pharmacy specific location: </label>
+                        placeholder="Pharmacy location">
                     <input type="text" name="phspecificlocation" id="phspecificlocation" required
-                        autocomplete="additional-name" placeholder="Naivas, Masai mall, Masai lodge, Tuskys">
-                    <label for="email">Email: </label>
-                    <input type="email" name="email" id="email" required autocomplete="email"
-                        placeholder="johndoe@gmail.com">
-                    <label for="phone">Phone: </label>
-                    <input type="tel" name="phone" id="phone" required autocomplete="phone" placeholder="0711223344">
-                    <label for="password">Password</label>
-                    <input type="password" name="password" id="password" required autocomplete="current-password"
-                        placeholder="Password">
-                    <input type="checkbox" id="showPassword"> Show Password<br>
+                        autocomplete="additional-name" placeholder="Specific location">
+                    <input type="tel" name="phone" id="phone" required autocomplete="phone" placeholder="Phone number">
                     <button type="button" class="register" id="submit">Register</button>
-                    <p class="alt_account">Already have an account? <a href="verifypharmacy.html" id="login-link">My
-                            pharmacy</a></p>
+                    <p class="alt_account">Already have an account? <a href="/pharmacy/login" id="login-link">Login</a>
+                    </p>
                 </form>
 
                 <script>
@@ -77,11 +66,9 @@
                             const pharmacyName = document.getElementById('phname').value.trim();
                             const pharmacyLocation = document.getElementById('phlocation').value.trim();
                             const pharmacySpecificLocation = document.getElementById('phspecificlocation').value.trim();
-                            const email = document.getElementById('email').value.trim();
                             const phone = document.getElementById('phone').value.trim();
-                            const password = document.getElementById('password').value.trim();
-
-                            if (pharmacyName === "" || pharmacyLocation === "" || pharmacySpecificLocation === "" || email === "" || phone === "" || password === "") {
+                           
+                            if (pharmacyName === "" || pharmacyLocation === "" || pharmacySpecificLocation === "" || phone === "" ) {
                                 alert("All fields are required.");
                                 return;
                             }
@@ -91,13 +78,11 @@
                                 pharmacyName,
                                 pharmacyLocation,
                                 pharmacySpecificLocation,
-                                email,
                                 phone,
-                                password
                             };
                             try {
                                 // Send registration data to server
-                                const response = await fetch('/register-pharmacy', {
+                                const res = await fetch('/pharmacy-register', {
                                     method: "POST",
                                     headers: {
                                         'Content-Type': 'application/json'
@@ -105,30 +90,21 @@
                                     body: JSON.stringify(userData)
                                 });
 
-                                const result = await response.json();
-
-                                if (response.ok) {
-                                    alert("Pharmacy Registration successful!");
+                                if (res.ok) { // Check if the response status is in the 200-299 range
+                                    const response = await res.json();
+                                    alert("Registration successful");
                                     // Redirect to login page or perform other actions after successful registration
-                                    window.location.href = "verifypharmacy.html";
+                                    window.location.href = "/pharmacy/login";
                                 } else {
-                                    alert("Registration failed. Please try again.");
+                                    const errorResponse = await res.json();
+                                    alert(`Registration failed. ${errorResponse.error}`);
                                 }
                             } catch (error) {
                                 console.error("Error during registration:", error);
                                 alert("An error occurred. Please try again later.");
                             }
                         });
-                        const passwordInput = document.getElementById('password');
-                        const showPasswordCheckbox = document.getElementById('showPassword');
-
-                        showPasswordCheckbox.addEventListener('change', function () {
-                            if (showPasswordCheckbox.checked) {
-                                password.type = 'text'; // Change type to 'text' to show the password
-                            } else {
-                                passwordInput.type = 'password'; // Change type back to 'password' to hide the password
-                            }
-                        });
+                       
                     });
 
                 </script>

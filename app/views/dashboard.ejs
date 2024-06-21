@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- SEO Meta Tags -->
+    <meta name="description"
+        content="Welcome to DocKonekt. Search for your hospital below or scroll down to pick a hospital.">
+    <meta name="keywords" content="DocKonekt, hospital, health, search">
+    <meta name="author" content="Futurion Labs">
+
+    <!-- Open Graph Protocol for Social Media Sharing -->
+    <meta property="og:title" content="DocKonekt">
+    <meta property="og:description"
+        content="Welcome to DocKonekt. Search for your hospital below or scroll down to pick a hospital.">
+    <meta property="og:image" content="https://dockonekt.com/app/public/res/Picture4.png">
+    <meta property="og:url" content="https://dockonekt.com">
+    <meta property="og:type" content="website">
+
+    <!-- Twitter Card for Twitter Sharing -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@louiso_chieng1">
+    <meta name="twitter:title" content="DocKonekt">
+    <meta name="twitter:description"
+        content="Welcome to DocKonekt. Search for your hospital below or scroll down to pick a hospital.">
+    <meta name="twitter:image" content="https://dockonekt.com/app/public/res/Picture4.png">
+    <link rel="icon" href="./res/Picture4.png" type="image/x-icon">
+    <link rel="stylesheet" href="/styles/index.css">
+    <link rel="stylesheet" href="/styles/small-devices.css">
+    <style>
+        .presentation {
+            padding: 1em;
+        }
+
+        .order-card {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            padding: 10px;
+            color: #fff;
+            background-color: rgb(34, 36, 51);
+            box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+            border-radius: 8px;
+        }
+
+        .order-details {
+            flex: 1;
+            padding-left: 20px;
+            /* Space between image and order details */
+        }
+
+        .prescription-image {
+            max-width: 200px;
+            max-height: 200px;
+            margin-bottom: 10px;
+            background-position: center;
+            background-size: cover;
+        }
+
+        .prescription-image img{
+            max-width: 200px;
+            max-height: 200px;
+        }
+
+        /* Style for tab buttons */
+        .tab-btn {
+            cursor: pointer;
+            padding: 10px 20px;
+            border-bottom: none;
+            border: none;
+            background-color: rgb(41, 44, 65);
+            border-top-right-radius: 10px;
+        }
+
+        /* Style for active tab button */
+        .active {
+            background-color: #050233;
+        }
+
+        /* Style for tab content */
+        .tab-content {
+            display: none;
+            padding: 20px;
+            /* background-color: 1px solid rgb(34, 36, 51); */
+            background-color: rgb(34, 36, 51);
+            box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+            border-radius: 8px;
+            border-top-left-radius: 0px;
+        }
+
+        /* Show active tab content */
+        .active-content {
+            display: block;
+        }
+
+        /* Style for order card */
+        .orders-card {
+            background-color: rgb(34, 36, 51);
+            /* White background */
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+            color: #fff;
+        }
+
+        @media (max-width: 1068px) {
+            .title {
+                font-size: 17px;
+            }
+
+            h3 {
+                font-size: 12px;
+            }
+
+            .order-card {
+                flex-direction: column;
+            }
+
+            .prescription-image {
+                width: 100%;
+                /* Ensure image spans full width on smaller screens */
+                max-height: none;
+                /* Reset max height for smaller screens */
+            }
+
+            .order-details {
+                padding-left: 0;
+                /* Remove left padding for order details on smaller screens */
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="top_bar">
+        <img src="/res/Picture4.png" alt="logo" class="logo">
+        <ul class="menu-items" id="menu-items">
+            <li><a href="/home" title="Home page">Home</a></li>
+            <li><a href="/blogs" title="Blogs page">Health Blog</a></li>
+            <li><a href="/about" title="Learn more about us">About Us</a></li>
+            <li><a href="/messages" title="Send uus a messaage">Contact Us</a></li>
+            <li><a href="/terms" title="Look at our terms of service">Terms of service</a></li>
+            <li><a href="/pharmacy/home" title="Register your pharmacy with us">Buy Medicine</a></li>
+            <li><a href="/pharmacy/register" title="Register your pharmacy with us">Log in to pharmacy</a></li>
+        </ul>
+        <img src="/res/menu_icon.png" alt="menu_icon" class="menu_icon" id="menu_icon">
+        <div class="profile" id="profile" style="background-image: url('/uploads/<%=  user.profile_pic %>');">
+        </div>
+    </div>
+    <div class="blogtitle"></div>
+    <div class="presentation">
+        <h1 class="title" style="color: #fff;">Welcome <%= user.name %>@<%= user.pharmacy_name %>
+        </h1>
+        <div class="tab">
+            <button class="tab-btn active" onclick="toggleTab(event, 'tab1')">Orders</button>
+            <button class="tab-btn" onclick="toggleTab(event, 'tab2')">Prescriptions</button>
+        </div>
+        <div id="tab1" class="tab-content active-content">
+            <div id="orders-container">
+                <% if (orders && orders.length> 0) { %>
+                    <% orders.forEach(order=> { %>
+                        <div class="orders-card">
+                            <h3>Order ID: <%= order.id %>
+                            </h3>
+                            <p>Customer Location: <%= order.customer_location %>
+                            </p>
+                            <p>Customer Phone: <%= order.customer_phone %>
+                            </p>
+                            <p>Order Status: <%= order.status %>
+                            </p>
+                        </div>
+                        <% }); %>
+                            <% } else { %>
+                                <p>No orders found.</p>
+                                <% } %>
+            </div>
+        </div>
+        <div id="tab2" class="tab-content">
+            <div id="prescription">
+                <% if (orders && orders.length > 0) { %>
+                    <% orders.forEach(order => { %>
+                        <% if (order.prescription) { %> 
+                            <div class="order-card">
+                                <div class="prescription-image" >
+                                    <img src="/uploads/<%= order.prescription %>" alt="Prescription Image">
+                                </div>
+                                <div class="order-details">
+                                    <h3>Order ID: <%= order.id %></h3>
+                                    <p>Customer Location: <%= order.customer_location %></p>
+                                    <p>Customer Phone: <%= order.customer_phone %></p>
+                                    <p>Order Status: <%= order.status %></p>
+                                </div>
+                            </div>
+                        <% } %>
+                    <% }); %>
+                <% } else { %>
+                    <p>No orders found.</p>
+                <% } %>
+            </div>
+            
+        </div>
+    </div>
+    <script>
+        function toggleTab(event, tabId) {
+            // Hide all tab content and remove active class from tab buttons
+            const tabContents = document.querySelectorAll('.tab-content');
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            tabContents.forEach(content => content.classList.remove('active-content'));
+            tabBtns.forEach(btn => btn.classList.remove('active'));
+
+            // Show the clicked tab content and add active class to the clicked tab button
+            const targetContent = document.getElementById(tabId);
+            const targetBtn = event.currentTarget;
+            targetContent.classList.add('active-content');
+            targetBtn.classList.add('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', async function () {
+            const menuIcon = document.getElementById('menu_icon');
+            const menuItems = document.getElementById('menu-items');
+
+            menuIcon.addEventListener('click', function () {
+                menuItems.classList.toggle('show');
+            });
+
+            const profile = document.getElementById('profile');
+
+            profile.addEventListener('click', async (e) => {
+                window.location.href = '/profile';
+            })
+
+        });
+    </script>
+</body>
+
+</html>

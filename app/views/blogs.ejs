@@ -7,33 +7,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blogs</title>
-    <link rel="stylesheet" href="styles/index.css">
-    <link rel="stylesheet" href="styles/small-devices.css">
-    <link rel="icon" href="./res/Picture4.png" type="image/x-icon">
+    <link rel="stylesheet" href="/styles/index.css">
+    <link rel="stylesheet" href="/styles/small-devices.css">
+    <link rel="icon" href="/res/Picture4.png" type="image/x-icon">
     <style>
         #area {
             padding-left: 10px;
             padding-right: 10px;
             height: max-content;
         }
-
-        h2 {
-            color: aliceblue;
-            background-color: #616161;
-            border-radius: 8px;
-        }
         
         #titl{
          margin-top: 90px;
         }
 
-        .back {
+        .divider{
+            margin-top: 80px;
+        }
+
+        .blog-card{
             color: aliceblue;
-            background-color: #616161;
+            background-color: rgb(34, 36, 51);
+            box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
             border-radius: 8px;
             font-family: sans-serif;
             font-size: larger;
             padding: 1em;
+            margin-bottom: 10px;
+        }
+
+        .blog-card p{
+           font-size: 17px;
         }
     </style>
 </head>
@@ -42,30 +46,38 @@
     <div class="top_bar">
         <img src="./res/Picture4.png" alt="logo" class="logo">
         <ul class="menu-items" id="menu-items">
-            <li><a href="home.html" title="Home page">Home</a></li>
+            <li><a href="/home" title="Home page">Home</a></li>
             <li><a href="/blogs" title="Blogs page">Health Blog</a></li>
-            <li><a href="about_us.html" title="Learn more about us">About Us</a></li>
-            <li><a href="get_in_touch.html" title="Send uus a messaage">Contact Us</a></li>
-            <li><a href="terms.html" title="Look at our terms of service">Terms of service</a></li>
-            <li><a href="user-type.html" title="Register your pharmacy with us">My Pharma</a></li>
+            <li><a href="/about" title="Learn more about us">About Us</a></li>
+            <li><a href="/messages" title="Send uus a messaage">Contact Us</a></li>
+            <li><a href="/terms" title="Look at our terms of service">Terms of service</a></li>
+            <li><a href="/pharmacy/home" title="Register your pharmacy with us">Buy Medicine</a></li>
+            <li><a href="/pharmacy/register" title="Register your pharmacy with us">Log in to pharmacy</a></li>
         </ul>
-        <img src="./res/menu_icon.png" alt="menu_icon" class="menu_icon" id="menu_icon">
-        <div class="profile" id="profile">
-            <img src="./res/profile.jpg" alt="Profile image">
+        <img src="/res/menu_icon.png" alt="menu_icon" class="menu_icon" id="menu_icon">
+        <div class="profile" id="profile" style="background-image: url('/uploads/<%=  user.profile_pic %>');">
         </div>
     </div>
     <div class="blog-area" id="area">
-        <h2 class="back" id="titl">
-            <%= blogs.data.title %>
-        </h2>
-        <div class="back">
-            <%- blogs.data.body %>
-        </div>
-        <p class="back">Time updated: <%= blogs.data.time %>
-        </p>
-        <p class="back">Date updated: <%= blogs.data.date %>
-        </p>
+        <div class="divider"></div>
+        <% blogs.forEach(blog => { %>
+            <div class="blog-card">
+                <h2><%= blog.title %></h2>
+                    <% 
+                    function truncateText(text, maxLength) {
+                        let truncated = text.trim().split(' ').slice(0, maxLength).join(' ');
+                        if (text.split(' ').length > maxLength) {
+                            truncated += '...';
+                        }
+                        return truncated;
+                    }
+                    %>
+                    <%- truncateText(blog.body, 50) %> 
+                <p>Published on <%= blog.date %> at <%= blog.time %></p>
+            </div>
+        <% }); %>
     </div>
+    
     <div class="bottom_bar">
         <footer class="footer">
             <center>
@@ -98,7 +110,7 @@
             const profile = document.getElementById('profile');
 
             profile.addEventListener('click', async (e) => {
-                window.location.href = 'profile';
+                window.location.href = '/profile';
             })
         });
     </script>

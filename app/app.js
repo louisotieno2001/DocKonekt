@@ -25,6 +25,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
+const upload = multer({ dest: __dirname + '/uploads/' });
+app.use('/uploads', express.static('/'));
 
 // Configure PostgreSQL database connection using environment variables
 const pool = new Pool({
@@ -84,366 +86,589 @@ async function query(path, config) {
     return res;
 }
 
-async function getBlog(id) {
-    let res = await query(`/items/blogs/${id}`, {
-        method: 'GET',
-    });
-    return await res.json();
+async function getBlogs() {
+    try {
+        let res = await query(`/items/blogs`, {
+            method: 'GET',
+        });
+        return await res.json();
+    } catch (error) {
+        console.error('Error fetching all blogs:', error);
+        throw new Error('Error fetching all blogs');
+    }
 }
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-app.get('/register', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-app.post('/register', async (req, res) => {
-    const { fullName, email, phone, password } = req.body;
-
-    try {
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-        const result = await pool.query(
-            'INSERT INTO users (name, email, phone, password) VALUES ($1, $2, $3, $4) RETURNING *',
-            [fullName, email, phone, hashedPassword]
-        );
-        console.log(result);
-
-        if (result.rows.length > 0) {
-            res.status(201).json({ success: true, user: result.rows[0] });
-        } else {
-            // Handle the case when result.rows is undefined or empty
-            res.status(500).json({ success: false, error: 'Registration failed' });
-        }
-    } catch (error) {
-        console.error('Error during registration:', error);
-        res.status(500).json({ success: false, error: 'Registration failed' });
-    }
-});
-
-app.post('/login', async (req, res) => {
-    const { email, password } = req.body;
-
-    try {
-        const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-
-        if (result.rows.length > 0) {
-            const user = result.rows[0];
-            const isPasswordMatch = await bcrypt.compare(password, user.password);
-
-            if (isPasswordMatch) {
-                // Store user information in the session
-                req.session.user = user;
-
-                // Check if the user's 'checked' field is true
-                if (user.checked === true) {
-                    // Send a JSON response indicating success and the redirect URL
-                    res.json({ success: true, redirect: '/guideline' });
-                } else {
-                    // Send a JSON response indicating success and the redirect URL
-                    res.json({ success: true, redirect: '/home.html' });
-                }
-            } else {
-                res.status(401).json({ success: false, error: 'Invalid credentials' });
-            }
-        } else {
-            res.status(401).json({ success: false, error: 'Invalid credentials' });
-        }
-    } catch (error) {
-        console.error('Error during login:', error);
-        res.status(500).json({ success: false, error: 'Login failed' });
-    }
-});
-
-app.post('/messages', checkSession, async (req, res) => {
-    try {
-        // Extract data from the request body
-        const { name, email, phone, message } = req.body;
-
-        // Insert the data into the PostgreSQL database
-        const query =
-            'INSERT INTO messages (name, email, phone, message) VALUES ($1, $2, $3, $4) RETURNING id';
-        const values = [name, email, phone, message];
-
-        // Execute the query and get the inserted row's ID
-        const result = await pool.query(query, values);
-        const insertedRow = result.rows[0];
-
-        // Send a response indicating successful insertion
-        res.status(201).json({
-            message: 'Data inserted successfully',
-            insertedRowId: insertedRow.id,
-        });
-    } catch (error) {
-        console.error('Error while inserting data:', error);
-        res.status(500).json({ message: 'Internal server error', error: error.message });
-    }
-});
-
-app.get('/pharmacies', checkSession, async (req, res) => {
-    try {
-        const result = await pool.query('SELECT id, pharmacy_name, pharmacy_location, pharmacy_specific_location, phone FROM pharmacists');
-        const pharmacies = result.rows;
-
-        // console.log('Pharmacies:', pharmacies);
-        res.json(pharmacies);
-    } catch (error) {
-        console.error('Error fetching schedule data from PostgreSQL database:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-
-app.get('/petition', checkSession, (req, res) => {
-    res.render('petition');
-});
-
-app.post('/petition', checkSession, async (req, res) => {
-    try {
-        const { text } = req.body;
-
-        const query =
-            'INSERT INTO petition (text) VALUES ($1) RETURNING id';
-        const values = [text];
-
-        // Execute the query and get the inserted row's ID
-        const result = await pool.query(query, values);
-        const insertedRow = result.rows[0];
-
-        res.status(201).json({
-            message: 'Data inserted successfully',
-            insertedRowId: insertedRow.id,
-        });
-    } catch (error) {
-        console.error('Error while inserting data:', error);
-        res.status(500).json({ message: 'Internal server error', error: error.message });
-    }
-});
-
-app.post('/register-pharmacy', checkSession, async (req, res) => {
-    const { pharmacyName, pharmacyLocation, pharmacySpecificLocation, email, phone, password } = req.body;
-
-    try {
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
-        // Insert the data into the PostgreSQL database
-        const query =
-            'INSERT INTO pharmacists (pharmacy_name, pharmacy_location, pharmacy_specific_location, email, phone, password) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id';
-        const values = [pharmacyName, pharmacyLocation, pharmacySpecificLocation, email, phone, hashedPassword];
-
-        // Execute the query and get the inserted row's ID
-        const result = await pool.query(query, values);
-        const insertedRow = result.rows[0];
-
-        console.log(result);
-
-        // Send a response indicating successful insertion
-        res.status(201).json({
-            message: 'Data inserted successfully',
-            insertedRowId: insertedRow.id,
-        });
-    } catch (error) {
-        console.error('Error while inserting data:', error);
-        res.status(500).json({ message: 'Internal server error', error: error.message });
-    }
-});
-
-app.post('/login-pharmacy', checkSession, async (req, res) => {
-    const { email, password } = req.body;
-
-    try {
-        const result = await pool.query('SELECT * FROM pharmacists WHERE email = $1', [email]);
-
-        if (result.rows.length > 0) {
-            const pharmacists = result.rows[0];
-            const isPasswordMatch = await bcrypt.compare(password, pharmacists.password);
-
-            if (isPasswordMatch) {
-                // Store pharmacist information in the session
-                req.session.pharmacists = pharmacists;
-
-                res.json({ success: true, pharmacists });
-            } else {
-                res.status(401).json({ success: false, error: 'Invalid credentials' });
-            }
-        } else {
-            res.status(401).json({ success: false, error: 'Invalid credentials' });
-        }
-    } catch (error) {
-        console.error('Error during login:', error);
-        res.status(500).json({ success: false, error: 'Login failed' });
-    }
-});
 
 app.get('/blogs', checkSession, async (req, res) => {
     try {
-        const blogs = await getBlog(1);
-        console.log(blogs);
-        res.render('blogs', { blogs });
+        const blogs = await getBlogs();
+        const id = req.session.user.id;
+        const user = await getProfile(id);
+        console.log(user)
+        res.render('blogs', { blogs: blogs.data,user: user.data[0]}); 
     } catch (error) {
         console.error('Error fetching blogs:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
-app.get('/profile', checkSession, async (req, res) => {
-    try {
-        // Retrieve user ID from session or any other means of identification
-        const userId = req.session.user.id; // Assuming you store the user ID in the session
-        // console.log(userId);
+app.get('/', (req, res) => {
+    res.render('index');
+});
 
-        // Query to retrieve user information from the database using the user ID
-        const query = 'SELECT name, phone, email FROM users WHERE id = $1';
-        const result = await pool.query(query, [userId]);
-        // console.log(result);
-        // If user not found in the database
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'User not found' });
+app.get('/login', (req, res) => {
+    res.render('login');
+});
+
+app.get('/home', async (req, res) => {
+    const id = req.session.user.id;
+    const user = await getProfile(id);
+    res.render('home', { user: user.data[0] });
+});
+
+app.get('/terms', async(req, res) => {
+    const id = req.session.user.id;
+
+    const user = await getProfile(id);
+    res.render('terms', { user: user.data[0]});
+});
+
+async function getPharmacies() {
+    try {
+        const res = await query(`/items/users`, {
+            method: 'GET',
+        });
+        return await res.json();
+    } catch (error) {
+        console.error('Error fetching referrals:', error);
+        throw new Error('Error fetching referrals');
+    }
+}
+
+app.get('/about', async (req, res) => {
+    const id = req.session.user.id;
+
+    const user = await getProfile(id);
+
+    res.render('about', { user: user.data[0]});
+});
+
+app.get('/pharmacy/home', async (req, res) => {
+    const id = req.session.user.id;
+    const pharmacies = await getPharmacies();
+    const user = await getProfile(id);
+    res.render('pharmacy', { user: user.data[0], users: pharmacies.data });
+});
+
+app.get('/pharmacy/register', (req, res) => {
+    const user = req.session.user;
+    res.render('pharmacy-register', { user: user });
+});
+
+app.get('/pharmacy/login', (req, res) => {
+    const user = req.session.user;
+    res.render('pharmacy-login', { user: user });
+});
+
+app.get('/messages', async (req, res) => {
+    const id = req.session.user.id;
+
+    const user = await getProfile(id);
+    res.render('messages', { user: user.data[0]});
+});
+
+async function getOrders(pharmacyId) {
+    try {
+        const res = await query(`/items/orders?filter[pharmacy_id][_eq]=${pharmacyId}`, {
+            method: 'GET',
+        });
+        return await res.json();
+    } catch (error) {
+        console.error('Error fetching referrals:', error);
+        throw new Error('Error fetching referrals');
+    }
+}
+
+app.get('/pharmacy/dashboard', checkSession, async (req, res) => {
+    const id = req.session.user.id;
+    const user = await getProfile(id);
+    const pharmacyId = req.session.user.pharmacy_name;
+    const orders = await getOrders(pharmacyId);
+    res.render('dashboard', { user: user.data[0], orders: orders.data  });
+});
+
+app.get('/confirmation', async (req, res) => {
+    res.render('confirmation');
+});
+
+// Function to register a user asynchronously
+async function registerUser(userData) {
+    try {
+        let res = await query(`/items/users/`, {
+            method: 'POST',
+            body: JSON.stringify(userData) // Send user data in the request body
+        });
+        return await res.json(); // Return parsed JSON response
+    } catch (error) {
+        console.error('Error registering user:', error);
+        throw error; // Rethrow error for handling in the calling function
+    }
+}
+
+// Route handler for POST /register
+app.post('/register', async (req, res) => {
+    try {
+        const { fullName, email, phone, password } = req.body;
+
+        // Validate required fields
+        if (!fullName || !email || !phone || !password) {
+            return res.status(400).json({ error: 'Please fill in all fields' });
         }
 
-        // Extract necessary information from the result
-        const { name, phone, email } = result.rows[0];
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-        // console.log(result.rows[0]);
+        // Construct user data object
+        const userData = {
+            name: fullName,
+            email: email,
+            phone: phone,
+            password: hashedPassword
+        };
 
-        // Render profile template and pass user's information to it
-        res.render('profile', { name, phone, email });
+        // Register the user using the async function
+        const newUser = await registerUser(userData);
+
+        // Send response indicating success
+        res.status(201).json({ message: 'User registered successfully', user: newUser });
     } catch (error) {
-        console.error('Error fetching profile data:', error);
+        console.error('Error inserting user:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
-app.get('/guideline', checkSession, async (req, res) => {
+async function loginUser(email) {
     try {
-        // Retrieve user ID from session or any other means of identification
-        const userId = req.session.user.id; // Assuming you store the user ID in the session
-        // console.log(userId);
+        const response = await query(`/items/users?filter[email][_eq]=${email}`, {
+            method: 'SEARCH',
+        });
+        const users = await response.json();
 
-        // Query to retrieve user information from the database using the user ID
-        const query = 'SELECT name FROM users WHERE id = $1';
-        const result = await pool.query(query, [userId]);
-        // console.log(result);
-        // If user not found in the database
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'User not found' });
+        return users;
+    } catch (error) {
+        console.error('Error querying user data:', error);
+        throw new Error('Error querying user data');
+    }
+}
+
+app.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Please fill in all fields' });
         }
 
-        // Extract necessary information from the result
-        const { name } = result.rows[0];
+        // Fetch user data from Directus (assuming loginUser function works correctly)
+        const usersResponse = await loginUser(email);
 
-        // console.log(result.rows[0]);
+        // If no user found, return invalid credentials error
+        if (!usersResponse || usersResponse.data.length === 0) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
 
-        // Render profile template and pass user's information to it
-        res.render('guideline', { name });
+        const user = usersResponse.data[0]; // Extract the first user from the response
+
+        // Compare provided password with the hashed password stored in the user's record
+        const passwordMatch = await bcrypt.compare(password, user.password);
+
+        // Handle invalid password
+        if (!passwordMatch) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        // Check user status (assuming user.checked is a boolean in the database)
+        if (user.checked === true) {
+            // Store user data in session
+            req.session.user = user;
+            // Respond with success message and redirect URL for verified users
+            return res.status(200).json({ message: 'Login successful', redirect: '/home' });
+        } else {
+            // Respond with redirect URL for unverified users
+            return res.status(200).json({ message: 'Login successful', redirect: '/guideline' });
+        }
+
     } catch (error) {
-        console.error('Error fetching profile data:', error);
+        // Handle internal server error
+        console.error('Error logging in user:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
-app.get('/hospitals', async (req, res) => {
+async function getProfile(userId) {
     try {
-        const result = await pool.query('SELECT hospital_name, hospital_url FROM hospitals');
-        const hospitals = result.rows;
-
-        res.json(hospitals);
+        const res = await query(`/items/users?filter[id][_eq]=${userId}`, {
+            method: 'GET',
+        });
+        return await res.json();
     } catch (error) {
-        console.error('Error fetching hospital data from PostgreSQL database:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error('Error fetching referrals:', error);
+        throw new Error('Error fetching referrals');
     }
-});
+}
 
-app.post('/orders', async (req, res) => {
-    const { userLocation, patientPhone, agreement, pharmacyId } = req.body;
-    const userId = req.session.user.id;
-
+async function updateName(userData) {
     try {
-        const result = await pool.query('INSERT INTO orders (user_location, patient_phone, agreement, user_id, pharmacy_id) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-            [userLocation, patientPhone, agreement, userId, pharmacyId]);
-
-        res.status(201).json({ success: true, order: result.rows[0] });
+        // Use your custom query function to send the update query
+        const res = await query(`/items/users/${userData.id}`, {
+            method: 'PATCH', // Assuming you want to update an existing item
+            body: JSON.stringify(userData) // Convert userData to JSON string
+        });
+        const updatedData = await res.json();
+        return updatedData; // Return updated data
     } catch (error) {
-        console.error('Error inserting order:', error);
-        res.status(500).json({ success: false, error: 'Failed to insert order' });
+        console.error('Error:', error);
+        throw new Error('Failed to update');
     }
-});
+}
 
-app.get('/get-orders', checkSession, async (req, res) => {
-    const pharmacistId = req.session.pharmacists.id;
-
+async function updatePhone(userData) {
     try {
-        const result = await pool.query(`
-            SELECT orders.*, users.name AS user_name
-            FROM orders
-            INNER JOIN users ON orders.user_id = users.id
-            WHERE orders.pharmacy_id = $1
-        `, [pharmacistId]);
-        const orders = result.rows;
-
-        res.json(orders);
+        // Use your custom query function to send the update query
+        const res = await query(`/items/users/${userData.id}`, {
+            method: 'PATCH', // Assuming you want to update an existing item
+            body: JSON.stringify(userData) // Convert userData to JSON string
+        });
+        const updatedData = await res.json();
+        return updatedData; // Return updated data
     } catch (error) {
-        console.error('Error fetching orders data from PostgreSQL database:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error('Error:', error);
+        throw new Error('Failed to update');
     }
-});
+}
 
 app.post('/edit-name', checkSession, async (req, res) => {
-    const { newName } = req.body;
-    const userId = req.session.user.id;
-
     try {
-        // Update the user's name in the database
-        const result = await pool.query(
-            'UPDATE users SET name = $1 WHERE id = $2 RETURNING *',
-            [newName, userId]
-        );
+        const { newName } = req.body;
 
-        if (result.rows.length > 0) {
-            const updatedUser = result.rows[0];
-            req.session.user = updatedUser; // Update user session information if needed
-            res.status(200).json({ success: true, user: updatedUser });
-        } else {
-            res.status(404).json({ success: false, error: 'User not found' });
-        }
+        const id = req.session.user.id;
+
+        const userId = req.session.user.id;
+
+        const userData = { id: id, name: newName }
+
+        const updatedData = await updateName(userData);
+
+        res.status(201).json({ message: 'Name updated successfully', updatedData });
     } catch (error) {
-        console.error('Error updating user name:', error);
-        res.status(500).json({ success: false, error: 'Failed to update user name' });
+        console.error('Error updating name:', error);
+        res.status(500).json({ message: 'Failed to update post. Please try again.' });
     }
 });
 
 app.post('/edit-phone', checkSession, async (req, res) => {
-    const { newPhone } = req.body;
-    const userId = req.session.user.id;
 
     try {
-        // Update the user's phone number in the database
-        const result = await pool.query(
-            'UPDATE users SET phone = $1 WHERE id = $2 RETURNING *',
-            [newPhone, userId]
-        );
+        const { newPhone } = req.body;
+        const id = req.session.user.id;
 
-        if (result.rows.length > 0) {
-            const updatedUser = result.rows[0];
-            req.session.user = updatedUser; // Update user session information if needed
-            res.status(200).json({ success: true, user: updatedUser });
-        } else {
-            res.status(404).json({ success: false, error: 'User not found' });
-        }
+        const userData = { id: id, phone: newPhone }
+
+        const updatedData = await updatePhone(userData);
+
+        res.status(201).json({ message: 'Phone updated successfully', updatedData });
     } catch (error) {
-        console.error('Error updating user phone number:', error);
-        res.status(500).json({ success: false, error: 'Failed to update user phone number' });
+        console.error('Error updating phone:', error);
+        res.status(500).json({ message: 'Failed to update post. Please try again.' });
+    }
+
+});
+
+app.get('/petition', checkSession, (req, res) => {
+    res.render('petition');
+});
+
+async function addPetition(userData) {
+    try {
+        let res = await query(`/items/petition/`, {
+            method: 'POST',
+            body: JSON.stringify(userData) // Send user data in the request body
+        });
+        return await res.json(); // Return parsed JSON response
+    } catch (error) {
+        console.error('Error registering user:', error);
+        throw error; // Rethrow error for handling in the calling function
+    }
+}
+
+app.post('/petition', checkSession, async (req, res) => {
+    try {
+        const { text } = req.body;
+        const email = req.session.user.email;
+
+        console.log(req.body);
+
+        // Validate required fields
+        if (!text) {
+            return res.status(400).json({ error: 'Please fill in all fields' });
+        }
+
+        // Construct user data object
+        const userData = {
+            email: email,
+            text: text
+        };
+
+        // Register the user using the async function
+        const newComplaint = await addPetition(userData);
+
+        // Send response indicating success
+        res.status(201).json({ message: 'Petition filed successfully', petition: newComplaint });
+    } catch (error) {
+        console.error('Error inserting user:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
-app.post('/search', async (req, res) => {
+async function registerPharmacy(userData) {
+    try {
+        // Use your custom query function to send the update query
+        const res = await query(`/items/users/${userData.id}`, {
+            method: 'PATCH', // Assuming you want to update an existing item
+            body: JSON.stringify(userData) // Convert userData to JSON string
+        });
+        const updatedData = await res.json();
+        return updatedData; // Return updated data
+    } catch (error) {
+        console.error('Error:', error);
+        throw new Error('Failed to update');
+    }
+}
 
+app.post('/pharmacy-register', checkSession, async (req, res) => {
+    try {
+        const { pharmacyName, pharmacyLocation, pharmacySpecificLocation, phone } = req.body;
+        const id = req.session.user.id;
+
+        // console.log(req.body);
+
+        // Validate required fields
+        if (!pharmacyName || !pharmacySpecificLocation || !pharmacyLocation || !phone) {
+            return res.status(400).json({ error: 'Please fill in all fields' });
+        }
+
+        // Construct user data object
+        const userData = {
+            id: id,
+            pharmacy_name: pharmacyName,
+            location: pharmacyLocation,
+            specific_location: pharmacySpecificLocation,
+            pharmacy_phone: phone,
+        };
+
+        // Register the user using the async function
+        const newPharmacy = await registerPharmacy(userData);
+
+        // Send response indicating success
+        res.status(201).json({ message: 'Pharmacy registered successfully', pharmacy: newPharmacy });
+    } catch (error) {
+        console.error('Error inserting user:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
 
-app.get('/confirmation', async (req, res) => {
-  res.render('confirmation');
+app.post('/pharmacy-login', checkSession, async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Please fill in all fields' });
+        }
+
+        // Fetch user data from Directus (assuming loginUser function works correctly)
+        const usersResponse = await loginUser(email);
+
+        // If no user found, return invalid credentials error
+        if (!usersResponse || usersResponse.data.length === 0) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        const user = usersResponse.data[0]; // Extract the first user from the response
+
+        // Compare provided password with the hashed password stored in the user's record
+        const passwordMatch = await bcrypt.compare(password, user.password);
+
+        // Handle invalid password
+        if (!passwordMatch) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        if (user.pharmacy_name === null) {
+            return res.status(200).json({ message: 'No pharmacy', redirect: '/pharmacy/register' });
+        } else {
+            // Respond with redirect URL for unverified users
+            return res.status(200).json({ message: 'Login successful', redirect: '/pharmacy/dashboard' });
+        }
+
+    } catch (error) {
+        // Handle internal server error
+        console.error('Error logging in user:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
 
+app.get('/profile', checkSession, async (req, res) => {
+    const id = req.session.user.id;
+
+    const user = await getProfile(id);
+
+    res.render('profile.ejs', { user: user.data[0] })
+});
+
+app.get('/guideline', checkSession, async (req, res) => {
+    const user = req.session.user;
+    res.render('guideline.ejs', { user: user });
+});
+
+async function registerOrder(orderData) {
+    try {
+        let res = await query(`/items/orders/`, {
+            method: 'POST',
+            body: JSON.stringify(orderData) // Send user data in the request body
+        });
+        return await res.json(); // Return parsed JSON response
+    } catch (error) {
+        console.error('Error registering user:', error);
+        throw error; // Rethrow error for handling in the calling function
+    }
+}
+
+// POST endpoint to handle orders
+app.post('/orders', upload.single('imageFile'), async (req, res) => {
+    try {
+        const { userLocation, patientPhone, agreement, pharmacyName, pharmacyLocation, specificLocation } = req.body;
+        const userId = req.session.user.id;
+
+        // Get file path from req.file or set to null if no file uploaded
+        const imagePath = req.file ? req.file.path : null;
+
+        const orderData = {
+            customer_location: userLocation,
+            customer_phone: patientPhone,
+            customer_consent: agreement,
+            user_id: userId,
+            pharmacy_id: pharmacyName,
+            location: pharmacyLocation,
+            specific_location: specificLocation,
+            prescription: imagePath // Store image path in order data
+        };
+
+        console.log(orderData);
+
+        // Register the order
+        const newOrder = await registerOrder(orderData);
+
+        // Send success response to the client
+        res.status(200).json({
+            success: true,
+            message: 'Order registered successfully',
+            order: newOrder // Optionally, send the newly created order details
+        });
+    } catch (error) {
+        console.error('Error processing order:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to register order',
+            error: error.message // Optionally, send the error message
+        });
+    }
+});
+
+async function updatePic(userData) {
+    try {
+        // Use your custom query function to send the update query
+        const res = await query(`/items/users/${userData.id}`, {
+            method: 'PATCH', // Assuming you want to update an existing item
+            body: JSON.stringify(userData) // Convert userData to JSON string
+        });
+        const updatedData = await res.json();
+        return updatedData; // Return updated data
+    } catch (error) {
+        console.error('Error:', error);
+        throw new Error('Failed to update');
+    }
+}
+
+app.post('/update-pic', upload.single('profilePic'), async (req, res) => {
+    try {
+        // Ensure that req.file contains the expected file information
+        const id = req.session.user.id;
+        if (!req.file || !req.file.path) {
+            return res.status(400).json({ message: 'No picture uploaded' });
+        }
+
+        // Use req.file.path or other relevant property to get the file path
+        const picturePath = req.file.path;
+
+        // Update userData object with profile_pic field
+        const userData = {
+            id: id, // Assuming req.user contains user information
+            profile_pic: picturePath
+        };
+
+        console.log(userData);
+
+        // Update user data with the new profile pic path
+        const updatedData = await updatePic(userData);
+
+        res.status(201).json({ message: 'Profile picture updated successfully', updatedData });
+    } catch (error) {
+        console.error('Error updating profile picture:', error);
+    }
+});
+
+async function registerMessages(userData) {
+    try {
+        let res = await query(`/items/messages/`, {
+            method: 'POST',
+            body: JSON.stringify(userData) // Send user data in the request body
+        });
+        return await res.json(); // Return parsed JSON response
+    } catch (error) {
+        console.error('Error registering user:', error);
+        throw error; // Rethrow error for handling in the calling function
+    }
+}
+
+app.post('/messages', checkSession, async (req, res) => {
+    try {
+        const { name, email, phone, message } = req.body;
+
+
+        // console.log(req.body);
+
+        // Validate required fields
+        if (!name || !email || !phone || !message) {
+            return res.status(400).json({ error: 'Please fill in all fields' });
+        }
+
+        // Construct user data object
+        const userData = {
+            name: name,
+            email: email,
+            phone: phone,
+            message: message,
+        };
+
+        // Register the user using the async function
+        const newMessage = await registerMessages(userData);
+
+        // Send response indicating success
+        res.status(201).json({ message: 'Message sent successfully', message: newMessage });
+    } catch (error) {
+        console.error('Error inserting user:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

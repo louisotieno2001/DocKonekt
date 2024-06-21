@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome</title>
-    <link rel="stylesheet" href="styles/index.css">
-    <link rel="stylesheet" href="styles/small-devices.css">
-    <link rel="icon" href="./res/Picture4.png" type="image/x-icon">
+    <link rel="stylesheet" href="/styles/index.css">
+    <link rel="stylesheet" href="/styles/small-devices.css">
+    <link rel="icon" href="/res/Picture4.png" type="image/x-icon">
     <!-- SEO Meta Tags -->
     <meta name="description"
         content="Welcome to DocKonekt. Search for your hospital below or scroll down to pick a hospital.">
@@ -29,6 +29,11 @@
     <meta name="twitter:description"
         content="Welcome to DocKonekt. Search for your hospital below or scroll down to pick a hospital.">
     <meta name="twitter:image" content="https://dockonekt.com/app/public/res/Picture4.png">
+    <style>
+        body {
+            background-color: rgb(34, 36, 51);
+        }
+    </style>
 </head>
 
 <body>
@@ -36,7 +41,7 @@
         <div class="home">
             <div class="left">
                 <div class="text">
-                    <img src="./res/Picture4.png" alt="logo" class="logo">
+                    <img src="/res/Picture4.png" alt="logo" class="logo">
                     <h1> Welcome to DocKonekt</h1>
                     <p>A service offered to make it easier for doctors and patients to connect for consultation
                         purposes.
@@ -59,7 +64,7 @@
                         placeholder="Password">
                     Show Password<input type="checkbox" id="showPassword">
                     <button type="button" class="register" id="submit">Register</button>
-                    <p class="alt_account">Already have an account? <a href="login.html" id="login-link">Login</a></p>
+                    <p class="alt_account">Already have an account? <a href="/login" id="login-link">Login</a></p>
                 </form>
 
                 <script>
@@ -82,9 +87,8 @@
                             // Validate input (you may want to implement more robust validation)
                             if (nameValue === "" || emailValue === "" || phoneValue === "" || passwordValue === "") {
                                 alert("All fields are required.");
-                                // return;
-                            }
-                            else {
+                                return;
+                            } else {
                                 try {
                                     // Create user data object
                                     let userData = {
@@ -94,6 +98,8 @@
                                         password: passwordValue
                                     };
 
+                                    // console.log(userData);
+
                                     const res = await fetch('/register', {
                                         method: "POST",
                                         headers: {
@@ -102,14 +108,14 @@
                                         body: JSON.stringify(userData)
                                     });
 
-                                    const response = await res.json();
-
-                                    if (response.success) { // Check for the success property
-                                        alert("A verification code has been sent to your email address, enter it in hr next page to continue");
+                                    if (res.ok) { // Check if the response status is in the 200-299 range
+                                        const response = await res.json();
+                                        alert("Registration successful");
                                         // Redirect to login page or perform other actions after successful registration
-                                        window.location.href = "login.html";
+                                        window.location.href = "/login";
                                     } else {
-                                        alert("Registration failed. Please try again.");
+                                        const errorResponse = await res.json();
+                                        alert(`Registration failed. ${errorResponse.error}`);
                                     }
                                 } catch (error) {
                                     console.error("Error during registration:", error);
@@ -117,6 +123,7 @@
                                 }
                             }
                         });
+
 
                         const showPasswordCheckbox = document.getElementById('showPassword');
 

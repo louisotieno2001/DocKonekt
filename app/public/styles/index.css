@@ -1,7 +1,7 @@
 body{
     margin: 0;
     padding: 0;
-    background-color: #212121;
+  background-color: rgb(34, 36, 51);
     height: 100vh;
 }
 
@@ -193,19 +193,15 @@ select{
 }
 
 .profile{
-    margin-top: -13px;
+    margin-top: 3px;
     margin-right: 5px;
-}
-
-.profile img{
-    height: 35px;
-    width: 35px;
+    height: 40px;
+    width: 40px;
     border-radius: 50%;
-    padding: 1em;
-}
-
-.profile img:hover{
+    background-size: cover;
+    background-position: center;
     cursor: pointer;
+    background-color: #090d3a;
 }
 
 .footer {
@@ -397,6 +393,7 @@ select{
     padding: 1em; 
     margin: 5px;
     background-color: rgb(34, 36, 51);
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
     font-family: sans-serif;
 }
 
