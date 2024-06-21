@@ -104,7 +104,7 @@ app.get('/blogs', checkSession, async (req, res) => {
         const id = req.session.user.id;
         const user = await getProfile(id);
         console.log(user)
-        res.render('blogs', { blogs: blogs.data,user: user.data[0]}); 
+        res.render('blogs', { blogs: blogs.data, user: user.data[0] });
     } catch (error) {
         console.error('Error fetching blogs:', error);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -125,11 +125,11 @@ app.get('/home', async (req, res) => {
     res.render('home', { user: user.data[0] });
 });
 
-app.get('/terms', async(req, res) => {
+app.get('/terms', async (req, res) => {
     const id = req.session.user.id;
 
     const user = await getProfile(id);
-    res.render('terms', { user: user.data[0]});
+    res.render('terms', { user: user.data[0] });
 });
 
 async function getPharmacies() {
@@ -149,7 +149,7 @@ app.get('/about', async (req, res) => {
 
     const user = await getProfile(id);
 
-    res.render('about', { user: user.data[0]});
+    res.render('about', { user: user.data[0] });
 });
 
 app.get('/pharmacy/home', async (req, res) => {
@@ -173,7 +173,7 @@ app.get('/messages', async (req, res) => {
     const id = req.session.user.id;
 
     const user = await getProfile(id);
-    res.render('messages', { user: user.data[0]});
+    res.render('messages', { user: user.data[0] });
 });
 
 async function getOrders(pharmacyId) {
@@ -193,7 +193,7 @@ app.get('/pharmacy/dashboard', checkSession, async (req, res) => {
     const user = await getProfile(id);
     const pharmacyId = req.session.user.pharmacy_name;
     const orders = await getOrders(pharmacyId);
-    res.render('dashboard', { user: user.data[0], orders: orders.data  });
+    res.render('dashboard', { user: user.data[0], orders: orders.data });
 });
 
 app.get('/confirmation', async (req, res) => {
@@ -248,10 +248,16 @@ app.post('/register', async (req, res) => {
 
 async function loginUser(email) {
     try {
+        // console.log('Querying Directus for user with email:', email);
         const response = await query(`/items/users?filter[email][_eq]=${email}`, {
             method: 'SEARCH',
         });
-        const users = await response.json();
+        const users = await response.json(); // Extract JSON data from the response
+
+        // Check if users array is empty or not
+        if (!users || users.length === 0) {
+            // console.log('No user found with email:', email);
+        }
 
         return users;
     } catch (error) {
@@ -260,6 +266,7 @@ async function loginUser(email) {
     }
 }
 
+// Login route
 app.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -268,11 +275,11 @@ app.post('/login', async (req, res) => {
             return res.status(400).json({ error: 'Please fill in all fields' });
         }
 
-        // Fetch user data from Directus (assuming loginUser function works correctly)
+        // Fetch user data from Directus
         const usersResponse = await loginUser(email);
 
         // If no user found, return invalid credentials error
-        if (!usersResponse || usersResponse.data.length === 0) {
+        if (!usersResponse || !usersResponse.data || usersResponse.data.length === 0) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
@@ -294,7 +301,7 @@ app.post('/login', async (req, res) => {
             return res.status(200).json({ message: 'Login successful', redirect: '/home' });
         } else {
             // Respond with redirect URL for unverified users
-            return res.status(200).json({ message:'Login successful', redirect: '/guideline' });
+            return res.status(200).json({ message: 'Login successful', redirect: '/guideline' });
         }
 
     } catch (error) {
