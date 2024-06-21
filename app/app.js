@@ -66,7 +66,7 @@ const checkSession = (req, res, next) => {
     if (req.session.user) {
         next(); // Continue to the next middleware or route
     } else {
-        res.redirect('/login.html'); // Redirect to the login page if no session is found
+        res.redirect('/login'); // Redirect to the login page if no session is found
     }
 };
 
@@ -294,7 +294,7 @@ app.post('/login', async (req, res) => {
             return res.status(200).json({ message: 'Login successful', redirect: '/home' });
         } else {
             // Respond with redirect URL for unverified users
-            return res.status(200).json({ message: 'Login successful', redirect: '/guideline' });
+            return res.status(200).json({ message:'Login successful', redirect: '/guideline' });
         }
 
     } catch (error) {
