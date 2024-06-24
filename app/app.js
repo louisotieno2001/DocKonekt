@@ -287,6 +287,7 @@ app.post('/login', async (req, res) => {
             // Respond with success message and redirect URL for verified users
             return res.status(200).json({ message: 'Login successful', redirect: '/home' });
         } else if(user.checked === false) {
+            req.session.user = user;
             // Respond with redirect URL for unverified users
             return res.status(200).json({ message: 'Login successful', redirect: '/guideline' });
         }
