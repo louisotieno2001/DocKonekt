@@ -11,8 +11,6 @@ const Fuse = require('fuse.js');
 const cors = require('cors');
 const ejs = require('ejs');
 const app = express();
-const nodemailer = require('nodemailer');
-const moment = require('moment');
 const axios = require('axios');
 const port = process.env.PORT || 3000;
 const saltRounds = 10; // Number of salt rounds for bcrypt
@@ -37,17 +35,6 @@ const pool = new Pool({
     port: process.env.DB_PORT,
     ssl: { rejectUnauthorized: false },
 });
-
-const transporter = nodemailer.createTransport({
-    host: 'smtp.dockonekt.com', // Your SMTP server details
-    port: 587,
-    auth: {
-        user: 'customers-service@dockonekt.com',
-        pass: '',
-    },
-});
-
-const verificationCodes = {}; // { email: code }
 
 app.use(session({
     store: new pgSession({
@@ -103,7 +90,7 @@ app.get('/blogs', checkSession, async (req, res) => {
         const blogs = await getBlogs();
         const id = req.session.user.id;
         const user = await getProfile(id);
-        console.log(user)
+        // console.log(user)
         res.render('blogs', { blogs: blogs.data, user: user.data[0] });
     } catch (error) {
         console.error('Error fetching blogs:', error);
