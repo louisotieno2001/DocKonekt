@@ -72,7 +72,7 @@
                         return truncated;
                     }
                     %>
-                    <%- truncateText(blog.body, 50) %> 
+                    <p><%- truncateText(blog.body, 50) %></p>
                 <p>Published on <%= blog.date %> at <%= blog.time %></p>
             </div>
         <% }); %>
