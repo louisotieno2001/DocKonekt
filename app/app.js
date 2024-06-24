@@ -66,7 +66,7 @@ const checkSession = (req, res, next) => {
     if (req.session.user) {
         next(); // Continue to the next middleware or route
     } else {
-        res.redirect('/login'); // Redirect to the login page if no session is found
+        res.redirect('/home'); // Redirect to the login page if no session is found
     }
 };
 
@@ -119,7 +119,7 @@ app.get('/login', (req, res) => {
     res.render('login');
 });
 
-app.get('/home', async (req, res) => {
+app.get('/home', checkSession,async (req, res) => {
     const id = req.session.user.id;
     const user = await getProfile(id);
     res.render('home', { user: user.data[0] });
@@ -144,7 +144,7 @@ async function getPharmacies() {
     }
 }
 
-app.get('/about', async (req, res) => {
+app.get('/about', checkSession, async (req, res) => {
     const id = req.session.user.id;
 
     const user = await getProfile(id);
@@ -152,14 +152,14 @@ app.get('/about', async (req, res) => {
     res.render('about', { user: user.data[0] });
 });
 
-app.get('/pharmacy/home', async (req, res) => {
+app.get('/pharmacy/home', checkSession, async (req, res) => {
     const id = req.session.user.id;
     const pharmacies = await getPharmacies();
     const user = await getProfile(id);
     res.render('pharmacy', { user: user.data[0], users: pharmacies.data });
 });
 
-app.get('/pharmacy/register', (req, res) => {
+app.get('/pharmacy/register', checkSession,(req, res) => {
     const user = req.session.user;
     res.render('pharmacy-register', { user: user });
 });
