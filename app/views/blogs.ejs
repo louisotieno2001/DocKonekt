@@ -93,7 +93,7 @@
                     truncated=text.trim().split(' ').slice(0, maxLength).join(' ');
                         if (text.split(' ').length > maxLength) {
                             truncated += ' ...'; } return truncated; } %>
-                    <p><%- truncateText(blog.body, 150) %><a href="#" class="read-more"
+                    <p><%- truncateText(blog.body, 100) %><a href="#" class="read-more"
                                 data-post-body="<%- blog.body %>">Read more</a></p>
                     <p>Published on <%= blog.date %> at <%= blog.time %>
                     </p>
