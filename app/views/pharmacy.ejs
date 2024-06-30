@@ -340,46 +340,51 @@
                 const patientPhone = document.getElementById('patient-phone').value;
                 const agreement = document.getElementById('agreement').value;
 
-                // Get image file from file input
-                const selectedFile = fileInput.files[0];
-
-                // Prepare form data including the image file if available
-                const formData = new FormData();
-                formData.append('pharmacyName', pharmacyName);
-                formData.append('pharmacyLocation', pharmacyLocation);
-                formData.append('specificLocation', specificLocation);
-                formData.append('userLocation', userLocation);
-                formData.append('patientPhone', patientPhone);
-                formData.append('agreement', agreement);
-
-                if (selectedFile) {
-                    formData.append('imageFile', selectedFile);
+                if (!pharmacyLocation || !pharmacyName || !specificLocation || !patientPhone || !agreement) {
+                    alert("An error occurred, make sure all fields are filled")
                 }
+                else {
 
-                try {
-                    // Send form data to server using fetch
-                    const response = await fetch('/orders', {
-                        method: 'POST',
-                        body: formData // Use FormData for file upload
-                    });
+                    // Get image file from file input
+                    const selectedFile = fileInput.files[0];
 
-                    if (!response.ok) {
-                        throw new Error('Failed to submit order.');
+                    // Prepare form data including the image file if available
+                    const formData = new FormData();
+                    formData.append('pharmacyName', pharmacyName);
+                    formData.append('pharmacyLocation', pharmacyLocation);
+                    formData.append('specificLocation', specificLocation);
+                    formData.append('userLocation', userLocation);
+                    formData.append('patientPhone', patientPhone);
+                    formData.append('agreement', agreement);
+
+                    if (selectedFile) {
+                        formData.append('imageFile', selectedFile);
                     }
 
-                    const data = await response.json();
-                    // console.log('Order submitted successfully:', data);
+                    try {
+                        // Send form data to server using fetch
+                        const response = await fetch('/orders', {
+                            method: 'POST',
+                            body: formData // Use FormData for file upload
+                        });
 
-                    alert('Order placed successfully');
+                        if (!response.ok) {
+                            throw new Error('Failed to submit order.');
+                        }
 
-                    dialog.close();
+                        const data = await response.json();
+                        // console.log('Order submitted successfully:', data);
 
-                } catch (error) {
-                    console.error('Error submitting order:', error.message);
-                    // Handle error
+                        alert('Order placed successfully');
+
+                        dialog.close();
+
+                    } catch (error) {
+                        console.error('Error submitting order:', error.message);
+                        // Handle error
+                    }
                 }
             });
-
 
             // Cancel button click event
             cancelBtn.addEventListener('click', async function () {

@@ -12,10 +12,12 @@ const cors = require('cors');
 const ejs = require('ejs');
 const app = express();
 const axios = require('axios');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 const port = process.env.PORT || 3000;
 const saltRounds = 10; // Number of salt rounds for bcrypt
 const url = process.env.DIRECTUS_URL;
-const token = process.env.DIRECTUS_TOKEN;
+const accessToken = process.env.DIRECTUS_TOKEN;
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -57,6 +59,17 @@ const checkSession = (req, res, next) => {
     }
 };
 
+const users = {}
+
+// Nodemailer configuration/SMPT settings
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'dockonekt@gmail.com',
+        pass: 'rtwetxzaQEWERTY'
+    }
+});
+
 /**
     @param path  {String}
     @param config {RequestInit}
@@ -65,7 +78,7 @@ const checkSession = (req, res, next) => {
 async function query(path, config) {
     const res = await fetch(encodeURI(`${url}${path}`), {
         headers: {
-            "Authorization": `Bearer ${token}`,
+            "Authorization": `Bearer ${accessToken}`,
             "Content-Type": "application/json",
         },
         ...config
@@ -662,6 +675,77 @@ app.post('/messages', checkSession, async (req, res) => {
     } catch (error) {
         console.error('Error inserting user:', error);
         res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.get('/forgot/password', (req, res) => {
+    res.render('forgot-password');
+});
+
+app.post('/forgot-password', (req, res) => {
+    const { email } = req.body;
+    console.log(req.body);
+    if (users[email]) {
+        // Generate a unique token
+        const token = crypto.randomBytes(20).toString('hex');
+        users[email].token = token;
+        users[email].expiry = Date.now() + 3600000; // 1 hour expiry
+
+        // Send password reset email
+        const resetLink = `http://localhost:3000/reset/password?token=${token}`;
+        transporter.sendMail({
+            to: email,
+            subject: 'Password Reset Request',
+            text: `To reset your password, click this link: ${resetLink}`
+        }, (error, info) => {
+            if (error) {
+                console.log(error);
+                res.send('Error sending email');
+            } else {
+                console.log('Email sent: ' + info.response);
+                res.send('Password reset email sent');
+            }
+        });
+    } else {
+        res.send('Email address not found');
+    }
+});
+
+app.get('/reset/password', (req, res) => {
+    const { token } = req.query;
+    if (token && users[req.query.email] && users[req.query.email].token === token && users[req.query.email].expiry > Date.now()) {
+        res.render('reset-password', { email: req.query.email });
+    } else {
+        res.send('Invalid or expired token');
+    }
+});
+
+async function updatePassword(userData) {
+    try {
+        const res = await query(`/items/users/${userData}`, {
+            method: 'PATCH', 
+            body: JSON.stringify(userData) 
+        });
+        const updatedData = { ...users[userData.email], password: userData.password };
+        users[userData.email] = updatedData;
+        return updatedData;
+    } catch (error) {
+        console.error('Error:', error);
+        throw new Error('Failed to update');
+    }
+}
+
+app.post('/reset-password', async (req, res) => {
+    const { email, password } = req.body;
+    try {
+        await updatePassword({ email, password });
+        // Clear token after password reset
+        delete users[email].token;
+        delete users[email].expiry;
+        res.send('Password reset successful');
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).send('Failed to reset password');
     }
 });
 

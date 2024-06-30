@@ -33,6 +33,12 @@
         body {
             background-color: rgb(34, 36, 51);
         }
+
+        #forgot{
+            color: #2196f3;
+            text-decoration: none;
+            padding: .5em;
+        }
     </style>
 </head>
 
@@ -59,8 +65,10 @@
                         placeholder="Password">
                     Show Password<input type="checkbox" id="showPassword">
                     <button type="button" id="login-btn" class="login">Login</button>
-                    <p class="alt_account">Don't have an account? <br><a href="/"
-                            id="register-link">Register</a></p>
+
+                    <p class="alt_account">Don't have an account? <a href="/"
+                        id="register-link">Register</a></p>
+                        <a href="/forgot/password" id="forgot">Forgot password?</a>
                 </form>
                 <script>
                     document.addEventListener("DOMContentLoaded", function () {
