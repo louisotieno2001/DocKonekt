@@ -7,8 +7,9 @@ self.addEventListener('install', function(event) {
         '/styles/index.css',
         '/styles/small-devices.css',
         '/app.js',
-        '/res/Picture4.png'
-        // Add more URLs to cache as needed
+        '/res/Picture4.png',
+        '/views/*.ejs',
+        '/res/*'
       ]);
     })
   );
