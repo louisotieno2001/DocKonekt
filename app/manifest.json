@@ -1,0 +1,25 @@
+{
+    "name": "Dockonekt",
+    "short_name": "Dockonekt",
+    "description": "Making healthcare access hustle free",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#4a90e2",
+    "icons": [
+      {
+        "src": "/res/Picture4.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      },
+      {
+        "src": "/res/Picture4.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ],
+    "scope": "/",
+    "manifest_version": 2,
+    "orientation": "any"
+  }
+  
