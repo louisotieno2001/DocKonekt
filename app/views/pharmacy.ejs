@@ -64,7 +64,7 @@
             font-size: 100%;
             height: 44px;
             line-height: 1.15;
-            margin: 12px 0 0;
+            margin: 10px;
             outline: none;
             overflow: hidden;
             padding: 0 25px;
@@ -76,7 +76,7 @@
             user-select: none;
             -webkit-user-select: none;
             touch-action: manipulation;
-            width: 50%;
+            width: 75%;
         }
 
         .button-9:disabled {
@@ -133,7 +133,7 @@
         }
 
         .option-txt {
-            margin-left: 50px;
+            margin-left: 48px;
         }
 
         .user-info {
@@ -149,7 +149,7 @@
         }
 
         #prescription {
-            margin: 2px;
+            margin: 10px;
         }
 
         .preview {
@@ -169,6 +169,10 @@
                 background-color: rgb(34, 36, 51);
                 box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
                 margin-left: -3px;
+            }
+
+            .button-9{
+                width: 50%;
             }
 
             .user-info {
@@ -243,8 +247,8 @@
 
             <!-- Dialog box -->
             <dialog class="dialog" style="background-color: rgb(34, 36, 51); border: none; border-radius: 8px;">
-                <h3 style="color: rgb(228, 82, 82);">Warning! This is an irreversible process, are you sure you want to
-                    proceed?</h3>
+                <!-- <h3 style="color: rgb(228, 82, 82);">Warning! This is an irreversible process, are you sure you want to
+                    proceed?</h3> -->
                 <form action="">
                     <button id="prescription">Add prescription picture</button>
                     <input type="file" id="fileInput" style="display: none;">
@@ -261,7 +265,7 @@
                 </form>
                 <button class="button-9" id="proceed">Proceed</button>
                 <button class="button-9" id="cancel">Cancel</button>
-                <p style="color: #fff;">By clicking proceed you agree to DocKonekt terms and conditions! <a
+                <p style="color: #fff; text-align: center;">By clicking proceed you agree to DocKonekt terms and conditions! <a
                         href="/terms">Terms of service</a></p>
             </dialog>
 

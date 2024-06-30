@@ -16,16 +16,16 @@
             padding-right: 10px;
             height: max-content;
         }
-        
-        #titl{
-         margin-top: 90px;
+
+        #titl {
+            margin-top: 90px;
         }
 
-        .divider{
+        .divider {
             margin-top: 80px;
         }
 
-        .blog-card{
+        .blog-card {
             color: aliceblue;
             background-color: rgb(34, 36, 51);
             box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
@@ -36,8 +36,32 @@
             margin-bottom: 10px;
         }
 
-        .blog-card p{
-           font-size: 17px;
+        .blog-card p {
+            font-size: 17px;
+        }
+
+        .read-more {
+            color: aliceblue;
+        }
+
+        .more {
+            background-color: rgb(34, 36, 51);
+            border: none;
+            border-radius: 8px;
+        }
+
+        .close {
+            color: aliceblue;
+            background-color: rgb(18, 19, 26);
+            padding: .5em;
+            width: max-content;
+            border-radius: 5px;
+            margin: 5px;
+            cursor: pointer;
+        }
+
+        #paragraph {
+            color: aliceblue;
         }
     </style>
 </head>
@@ -60,24 +84,28 @@
     </div>
     <div class="blog-area" id="area">
         <div class="divider"></div>
-        <% blogs.forEach(blog => { %>
+        <% blogs.forEach(blog=> { %>
             <div class="blog-card">
-                <h2><%= blog.title %></h2>
-                    <% 
-                    function truncateText(text, maxLength) {
-                        let truncated = text.trim().split(' ').slice(0, maxLength).join(' ');
+                <h2>
+                    <%= blog.title %>
+                </h2>
+                <% function truncateText(text, maxLength) { let
+                    truncated=text.trim().split(' ').slice(0, maxLength).join(' ');
                         if (text.split(' ').length > maxLength) {
-                            truncated += '...';
-                        }
-                        return truncated;
-                    }
-                    %>
-                    <p><%- truncateText(blog.body, 50) %></p>
-                <p>Published on <%= blog.date %> at <%= blog.time %></p>
+                            truncated += ' ...'; } return truncated; } %>
+                    <p><%- truncateText(blog.body, 50) %><a href="#" class="read-more"
+                                data-post-body="<%- blog.body %>">Read more</a></p>
+                    <p>Published on <%= blog.date %> at <%= blog.time %>
+                    </p>
             </div>
-        <% }); %>
+            <% }); %>
     </div>
-    
+
+    <dialog class="more" id="more">
+        <div id="paragraph"></div>
+        <div class="close" id="close">Close</div>
+    </dialog>
+
     <div class="bottom_bar">
         <footer class="footer">
             <center>
@@ -102,6 +130,29 @@
         document.addEventListener('DOMContentLoaded', function () {
             const menuIcon = document.getElementById('menu_icon');
             const menuItems = document.getElementById('menu-items');
+            const moreDialog = document.getElementById('more');
+            const closeDialog = document.getElementById('close');
+            const paragraph = document.getElementById('paragraph');
+
+            closeDialog.addEventListener('click', async (e) => {
+                moreDialog.close();
+            });
+
+            var moreButtons = document.querySelectorAll('.read-more');
+
+            moreButtons.forEach(async function (button) {
+                button.addEventListener('click', async function () {
+                    var body = this.getAttribute('data-post-body');
+                    paragraph.innerHTML = stripHtml(body); // Use a function to strip HTML tags
+                    moreDialog.showModal();
+                });
+            });
+
+            function stripHtml(html) {
+                var tmp = document.createElement("DIV");
+                tmp.innerHTML = html;
+                return tmp.textContent || tmp.innerText || "";
+            }
 
             menuIcon.addEventListener('click', function () {
                 menuItems.classList.toggle('show');

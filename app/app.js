@@ -570,7 +570,7 @@ app.post('/orders', upload.single('imageFile'), async (req, res) => {
             prescription: imagePath // Store image path in order data
         };
 
-        console.log(orderData);
+        // console.log(orderData);
 
         // Register the order
         const newOrder = await registerOrder(orderData);
