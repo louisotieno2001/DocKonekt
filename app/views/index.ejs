@@ -139,18 +139,31 @@
                                 passwordInput.type = 'password'; // Change type back to 'password' to hide the password
                             }
                         });
+
+                        if ('serviceWorker' in navigator) {
+                            window.addEventListener('load', function () {
+                                navigator.serviceWorker.register('/service-worker.js')
+                                    .then(function (registration) {
+                                        console.log('Service Worker registered with scope:', registration.scope);
+                                    })
+                                    .catch(function (error) {
+                                        console.error('Service Worker registration failed:', error);
+                                    });
+                            });
+                        }
                     });
 
                     if ('serviceWorker' in navigator) {
-                        navigator.serviceWorker.register('/service-worker.js')
-                            .then(function (registration) {
-                                console.log('Service Worker registered with scope:', registration.scope);
-                            })
-                            .catch(function (error) {
-                                console.error('Service Worker registration failed:', error);
-                            });
+                        window.addEventListener('load', function () {
+                            navigator.serviceWorker.register('/service-worker.js')
+                                .then(function (registration) {
+                                    console.log('Service Worker registered with scope:', registration.scope);
+                                })
+                                .catch(function (error) {
+                                    console.error('Service Worker registration failed:', error);
+                                });
+                        });
                     }
-
                 </script>
             </div>
         </div>
